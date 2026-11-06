@@ -116,7 +116,7 @@ const cardP=t=>`<div class="cd ed" onclick="if(!event.target.closest('button'))o
 const cardD=t=>`<div class="cd"><span class="tg b" data-c="${t.cat}"></span><div class="ti">${E(t.title)}</div>${t.note?`<div class="nt">${E(t.note)}</div>`:""}<div class="ft"><span class="dt">${(t.finished||"").replaceAll("-","/")} 完成<br>${t.created.replaceAll("-","/")} 建立</span><div class="bs"><button class="b rs" style="${BT}" aria-label="還原" onclick="rst('${t.id}')"></button><button class="b bx" style="${XT}" aria-label="刪除" onclick="del('${t.id}')"></button></div></div></div>`;
 const cardN=t=>{const p=plain(t.html);return `<div class="cd"><div class="ti" style="padding-right:0">${E(t.title||"（無標題）")}</div>${p?`<div class="nt cl">${E(p)}</div>`:""}<div class="ft"><span class="dt">${t.created.replaceAll("-","/")} 建立</span><div class="bs"><button class="b eb" style="${BT}" aria-label="編輯" onclick="ne('${t.id}')"></button><button class="b bx" style="${XT}" aria-label="刪除" onclick="dnote('${t.id}')"></button></div></div></div>`};
 const fd=v=>String(v).replace(/^(\d+)-(\d+)-(\d+)$/,(m,y,o,d)=>y+"年"+(+o)+"月"+(+d)+"日");
-const dfield=v=>`<div class="df"><span id="dtx">${fd(v)}</span><input id="n2" type="date" value="${v}" onchange="document.getElementById('dtx').textContent=fd(this.value)"></div>`;
+const dfield=v=>`<div class="df"><span id="dtx">${fd(v)}</span><input id="n2" type="date" onclick="dp(this)" value="${v}" onchange="document.getElementById('dtx').textContent=fd(this.value)"></div>`;
 let AC=[],CA=null,AD={d:"",t:"",c:""};
 try{AC=JSON.parse(localStorage.getItem("yiyiyi-ach-v1")||"[]")}catch(e){}
 const saveA=()=>{try{localStorage.setItem("yiyiyi-ach-v1",JSON.stringify(AC))}catch(e){}};
@@ -147,7 +147,7 @@ const isP=t=>!t.done&&t.pend&&!(t.start&&t.start<=iso()),isA=t=>!t.done&&!isP(t)
 const p2=v=>String(v).padStart(2,"0"),dnum=s=>{const[y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d)/864e5};
 const addD=(s,n)=>{const[y,m,d]=s.split("-").map(Number),x=new Date(Date.UTC(y,m-1,d+n));return x.getUTCFullYear()+"-"+p2(x.getUTCMonth()+1)+"-"+p2(x.getUTCDate())};
 const dueTx=s=>{const n=dnum(s)-dnum(iso());return n>0?"剩"+n+"天截止":n==0?"今天截止":"已逾期"+(-n)+"天"};
-const dfield2=(id,v)=>`<div class="df"><span id="${id}x">${fd(v)}</span><input id="${id}" type="date" value="${v}" onchange="document.getElementById('${id}x').textContent=fd(this.value)"></div>`;
+const dfield2=(id,v)=>`<div class="df"><span id="${id}x">${fd(v)}</span><input id="${id}" type="date" onclick="dp(this)" value="${v}" onchange="document.getElementById('${id}x').textContent=fd(this.value)"></div>`;
 const nextD=D=>{const t=new Date(),td=iso();for(let k=0;k<3;k++){const y=t.getFullYear(),m=t.getMonth()+k,n=new Date(y,m+1,0).getDate(),x=new Date(y,m,Math.min(D,n)),s=x.getFullYear()+"-"+p2(x.getMonth()+1)+"-"+p2(x.getDate());if(s>td)return s}};
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&(view=="task"||view=="tp")&&!MO)draw()});
 const DA={base:A.base,base2:A.base2,base3:A.base3},DTB={},TK="yiyiyi-theme",SL=[["base","任務頁背景"],["base2","一般頁背景"],["base3","日曆・設定背景"]];let TH=[],TA="default",TX=null;
@@ -170,6 +170,7 @@ function rk(k){rdn();delete TX.imgs[k];delete TX.tb[k];draw()}
 async function svt(){rdn();const o={...TX,name:TX.name.trim()||"新主題",id:TX.id||Date.now().toString(36)};if(TX.id)TH=TH.map(x=>x.id==o.id?o:x);else TH.push(o);try{await dbx("readwrite",s=>s.put(o))}catch(e){}if(TA==o.id)applyTheme(o.id);TX=null;go("th")}
 function TEB(){TX=null;go("th")}
 async function dth(id){TH=TH.filter(x=>x.id!=id);try{await dbx("readwrite",s=>s.delete(id))}catch(e){}if(TA==id)applyTheme("default");draw()}
+function dp(e){if(matchMedia("(pointer:fine)").matches)try{e.showPicker()}catch(x){}}
 let NQ="";function noteList(){const q=NQ.trim().toLowerCase(),l=q?N.filter(t=>((t.title||"")+" "+plain(t.html)).toLowerCase().includes(q)):N;return l.map(cardN).join("")||`<div class="em">${N.length?"找不到符合的筆記":"還沒有筆記"}</div>`}
 function draw(){const y0=document.getElementById("ls"),sy=y0?y0.scrollTop:0,d=new Date(),wk="日一二三四五六"[d.getDay()],ed=view=="edit",tk=view=="task";
 $.style.backgroundImage=`url(${tk?A.base:view=="cal"||view=="set"?A.base3:A.base2})`;
