@@ -126,7 +126,7 @@ function sva(){const[d,t,c]=rd();if(!t.trim()){document.getElementById("n1").foc
 if(CA){const a=AC.find(x=>x.id==CA);if(a){a.title=t.trim();a.content=c.trim();a.date=dt}}else AC.unshift({id:Date.now().toString(36),title:t.trim(),content:c.trim(),date:dt});
 saveA();MO=false;draw()}
 function da(i){AC=AC.filter(x=>x.id!=i);saveA();draw()}
-const TC={"行程":"#637eab","節慶":"#cea95b","活動":"#d98795"},EVT=["行程","節慶","活動"];
+const TC={"行程":"#637eab","節慶":"#cea95b","活動":"#d98795","截止":"#a8483f"},EVT=["行程","節慶","活動"];
 let EV=[],CM={y:new Date().getFullYear(),m:new Date().getMonth()},CS=null,CE=null,cp="行程",CD={d:"",t:"",c:""},MO=false;
 try{EV=JSON.parse(localStorage.getItem("yiyiyi-events-v1")||"[]")}catch(e){}
 const saveE=()=>{try{localStorage.setItem("yiyiyi-events-v1",JSON.stringify(EV))}catch(e){}};
@@ -171,6 +171,7 @@ async function svt(){rdn();const o={...TX,name:TX.name.trim()||"新主題",id:TX
 function TEB(){TX=null;go("th")}
 async function dth(id){TH=TH.filter(x=>x.id!=id);try{await dbx("readwrite",s=>s.delete(id))}catch(e){}if(TA==id)applyTheme("default");draw()}
 function dp(e){if(matchMedia("(pointer:fine)").matches)try{e.showPicker()}catch(x){}}
+const cardX=t=>`<div class="cd"><span class="pl" style="background:${TC["截止"]}">截止</span><div class="ti">${E(t.title)}</div>${t.note?`<div class="nt">${E(t.note)}</div>`:""}</div>`;
 let NQ="";function noteList(){const q=NQ.trim().toLowerCase(),l=q?N.filter(t=>((t.title||"")+" "+plain(t.html)).toLowerCase().includes(q)):N;return l.map(cardN).join("")||`<div class="em">${N.length?"找不到符合的筆記":"還沒有筆記"}</div>`}
 function draw(){const y0=document.getElementById("ls"),sy=y0?y0.scrollTop:0,d=new Date(),wk="日一二三四五六"[d.getDay()],ed=view=="edit",tk=view=="task";
 $.style.backgroundImage=`url(${tk?A.base:view=="cal"||view=="set"?A.base3:A.base2})`;
@@ -203,10 +204,10 @@ h+=`<div id="ls" class="p" style="${S(245,612,840,1600)}">${l.map(cardA).join(""
 <button class="p b nb" style="${S(240,2270,852,124)}" aria-label="新成就" onclick="oa(null)"></button>
 <div id="md" style="display:${MO?"block":"none"}" onclick="if(event.target==this)cl()"><div id="pn"><h2>${CA?"編輯成就":"新成就"}</h2><div class="lbl">達成日期</div>${dfield(AD.d)}<input id="n1" type="text" placeholder="主標" maxlength="40" value="${E(AD.t)}"><textarea id="n3" placeholder="內容（可不填）">${E(AD.c)}</textarea><button id="go" class="b lb" onclick="sva()"><span>完成</span></button><button id="cx" onclick="cl()">取消</button></div></div>`}
 else if(view=="cal"){const y=CM.y,m=CM.m,f=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate(),td=iso(),sd=CS||td,p2=v=>String(v).padStart(2,"0");
-const dots=k=>[...new Set(EV.filter(e=>e.date==k).map(e=>e.type))].slice(0,3).map(t=>`<i style="background:${TC[t]}"></i>`).join("");
+const dots=k=>[...new Set([...(T.some(t=>isA(t)&&t.due==k)?["截止"]:[]),...EV.filter(e=>e.date==k).map(e=>e.type)])].slice(0,3).map(t=>`<i style="background:${TC[t]}"></i>`).join("");
 let g="<div></div>".repeat(f);for(let d=1;d<=n;d++){const k=y+"-"+p2(m+1)+"-"+p2(d);g+=`<div class="dy${k==sd?" sl":""}${k==td?" td":""}" onclick="CS='${k}';draw()"><b>${d}</b><span>${dots(k)}</span></div>`}
-const ev=EV.filter(e=>e.date==sd),sdt=new Date(sd+"T00:00:00");
-h+=`<div class="p cw" style="${S(235,575,860,1655)}"><div class="mh"><button class="ar" style="--i:var(--al)" aria-label="上個月" onclick="mv(-1)"></button><div onclick="CM={y:new Date().getFullYear(),m:new Date().getMonth()};CS=null;draw()">${y}年${m+1}月</div><button class="ar" style="--i:var(--ar)" aria-label="下個月" onclick="mv(1)"></button></div><div class="wh">${"日一二三四五六".split("").map(w=>`<span>${w}</span>`).join("")}</div><div class="gr">${g}</div><div class="hd">${sdt.getMonth()+1}月${sdt.getDate()}日　星期${"日一二三四五六"[sdt.getDay()]}</div><div id="ls" style="flex:1;min-height:0">${ev.map(cardE).join("")||`<div class="em" style="padding-top:calc(var(--u)*70)">這天沒有行程</div>`}</div></div>
+const ev=EV.filter(e=>e.date==sd),du=T.filter(t=>isA(t)&&t.due==sd),sdt=new Date(sd+"T00:00:00");
+h+=`<div class="p cw" style="${S(235,575,860,1655)}"><div class="mh"><button class="ar" style="--i:var(--al)" aria-label="上個月" onclick="mv(-1)"></button><div onclick="CM={y:new Date().getFullYear(),m:new Date().getMonth()};CS=null;draw()">${y}年${m+1}月</div><button class="ar" style="--i:var(--ar)" aria-label="下個月" onclick="mv(1)"></button></div><div class="wh">${"日一二三四五六".split("").map(w=>`<span>${w}</span>`).join("")}</div><div class="gr">${g}</div><div class="hd">${sdt.getMonth()+1}月${sdt.getDate()}日　星期${"日一二三四五六"[sdt.getDay()]}</div><div id="ls" style="flex:1;min-height:0">${du.map(cardX).join("")}${ev.map(cardE).join("")||(du.length?"":`<div class="em" style="padding-top:calc(var(--u)*70)">這天沒有行程</div>`)}</div></div>
 <button class="p b lb" style="${S(240,2270,856,124)}" aria-label="新增行程" onclick="oc(null)"><span>＋ 新增行程</span></button>
 <div id="md" style="display:${MO?"block":"none"}" onclick="if(event.target==this)cl()"><div id="pn"><h2>${CE?"編輯行程":"新增行程"}</h2><div class="ch">${EVT.map(t=>`<button class="ep${cp==t?" on":""}" style="background:${TC[t]}" onclick="sc('${t}')">${t}</button>`).join("")}</div>${dfield(CD.d)}<input id="n1" type="text" placeholder="主標" maxlength="40" value="${E(CD.t)}"><textarea id="n3" placeholder="內容（可不填）">${E(CD.c)}</textarea><button id="go" class="b lb" onclick="sv()"><span>完成</span></button><button id="cx" onclick="cl()">取消</button></div></div>`}
 else if(view=="note"){h+=`<input id="sq" class="p fld" type="text" maxlength="40" placeholder="搜尋筆記" value="${E(NQ)}" oninput="NQ=this.value;document.getElementById('ls').innerHTML=noteList()" style="${S(262,624,794,91)}"><div id="ls" class="p" style="${S(245,753,840,1470)}">${noteList()}</div>
