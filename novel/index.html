@@ -367,7 +367,33 @@ async function initAuth() {
     error_callback: e => tokenWaiters.splice(0).forEach(w => w.rej(new Error(e && e.type || '登入視窗被關閉'))),
   });
 }
+/* 手機（尤其加到主畫面時）彈出視窗登入常失敗，改用「跳轉到 Google 再跳回來」 */
+const USE_REDIRECT = matchMedia('(pointer:coarse)').matches || navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+const REDIRECT_URI = location.origin + location.pathname.replace(/index\.html$/, '');
+async function saveDraftsNow() {
+  for (const id of S.dirty) { const n = node(id); if (n) await idb.set('drafts', id, {text: n.text, base: n.base}); }
+}
+async function redirectLogin() {
+  await saveDraftsNow();
+  const st = Math.random().toString(36).slice(2);
+  localStorage.setItem('nn_state', st);
+  const q = {client_id: clientId(), redirect_uri: REDIRECT_URI, response_type: 'token', scope: SCOPE, include_granted_scopes: 'true', state: st};
+  if (!localStorage.getItem('nn_consented')) q.prompt = 'consent';
+  location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams(q);
+}
+/** 從 Google 跳回來時，網址 # 後面會帶著登入結果 */
+function takeRedirectToken() {
+  if (!location.hash || !/access_token=|error=/.test(location.hash)) return null;
+  const h = new URLSearchParams(location.hash.slice(1));
+  history.replaceState(null, '', location.pathname + location.search);
+  if (h.get('error')) return 'Google 回傳錯誤：' + h.get('error');
+  if (h.get('state') !== localStorage.getItem('nn_state')) return '登入驗證碼不符，請再試一次';
+  token = h.get('access_token'); tokenExp = Date.now() + (Number(h.get('expires_in') || 3600) - 120) * 1000;
+  try { localStorage.setItem('nn_tok', JSON.stringify({token, tokenExp})); localStorage.setItem('nn_consented', '1'); } catch {}
+  return '';
+}
 function requestToken() {
+  if (USE_REDIRECT) { redirectLogin(); return new Promise(() => {}); }
   return new Promise((res, rej) => {
     tokenWaiters.push({res, rej});
     tokenClient.requestAccessToken({prompt: localStorage.getItem('nn_consented') ? '' : 'consent'});
@@ -745,6 +771,7 @@ const GDOC = 'application/vnd.google-apps.document';
 let readToken = null, readExp = 0;
 function requestReadToken() {
   if (DEMO) return Promise.resolve('demo');
+  if (USE_REDIRECT) return Promise.reject(new Error('從雲端硬碟匯入請用電腦操作'));
   if (readToken && Date.now() < readExp) return Promise.resolve(readToken);
   return new Promise((res, rej) => {
     const c = google.accounts.oauth2.initTokenClient({
@@ -1344,6 +1371,14 @@ async function start() {
   $('#cidSave').onclick = () => { const v = $('#cidInput').value.trim(); if (v) { localStorage.setItem('nn_client_id', v); location.reload(); } };
   if (DEMO) return start();
   if (!clientId()) return show('setup');
+  const redirErr = takeRedirectToken();
+  if (redirErr) { show('login'); $('#loginErr').textContent = redirErr; }
+  if (USE_REDIRECT) {
+    $('#loginBtn').onclick = () => redirectLogin();
+    if (token) start(); else show('login');
+    try { await initAuth(); } catch {}
+    return;
+  }
   try { await initAuth(); } catch (e) { show('login'); $('#loginErr').textContent = e.message; return; }
   $('#loginBtn').onclick = () => run(async () => {
     $('#loginErr').textContent = '';
