@@ -128,6 +128,8 @@ h2.ptitle{font-family:var(--serif);font-size:30px;font-weight:600;margin:4px 0 1
 .findrow input{border:none;outline:none;background:transparent;padding:6px 4px;flex:1;min-width:0;font-size:14px;color:var(--ink)}
 .findrow .n{font-size:12.5px;color:var(--mute);min-width:48px;flex:none;text-align:center;font-variant-numeric:tabular-nums}
 .aa{padding:4px 10px;font-weight:700}
+.undo{font-size:19px;padding:2px 7px;color:var(--ink)}
+.undo:disabled{color:#c8c8c8;background:none;cursor:default}
 #typo{position:fixed;z-index:50;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:12px 14px;width:290px;max-width:calc(100vw - 16px)}
 .trow{display:grid;grid-template-columns:40px 1fr 64px;align-items:center;gap:8px;margin:8px 0;font-size:13.5px}
 .trow input{width:100%;accent-color:#111}
@@ -1054,6 +1056,7 @@ function renderDoc(n, opts = {}) {
   <div class="dochead">
     <div class="topbar"><button class="back" data-act="back">‹ 目錄</button><div class="crumb">${crumbHtml(n.id)}</div>
       <span class="savest"></span>
+      ${read ? '' : `<button class="iconbtn undo" data-act="undo" title="上一步（Ctrl/⌘+Z）">↶</button><button class="iconbtn undo" data-act="redo" title="下一步（Ctrl/⌘+Shift+Z）">↷</button>`}
       <button class="btn aa" data-act="typo" title="字級、字距、行距">Aa</button>
       <div class="seg"><button data-act="mode" data-m="edit" class="${read ? '' : 'on'}">編輯</button><button data-act="mode" data-m="read" class="${read ? 'on' : ''}">閱讀</button></div>
     </div>
@@ -1092,7 +1095,17 @@ function renderDoc(n, opts = {}) {
   if (!read) {
     const ed = $('#ed');
     ed.value = n.text || '';
-    ed.addEventListener('input', () => { markDirty(n.id, ed.value); paintHl(); updateCounts(); if (S.hl) focusMark(false); });
+    const h = hist(n.id);
+    if (h.stack[h.idx].text !== ed.value) { h.mustPush = true; recordHist(n.id, ed); }
+    ed.addEventListener('input', () => { recordHist(n.id, ed); markDirty(n.id, ed.value); paintHl(); updateCounts(); if (S.hl) focusMark(false); });
+    ed.addEventListener('keydown', e => {
+      if (!(e.metaKey || e.ctrlKey)) return;
+      const k = e.key.toLowerCase();
+      if (k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
+      else if (k === 'y') { e.preventDefault(); redo(); }
+    });
+    document.querySelectorAll('.undo').forEach(b => b.addEventListener('pointerdown', e => e.preventDefault()));
+    updateUndoBtns();
   }
   paintHl();
   if (S.hl && opts.pos != null) { const k = markList().findIndex(mk => +mk.dataset.pos >= opts.pos); S.hlIndex = k < 0 ? 0 : k; }
@@ -1103,6 +1116,58 @@ function renderDoc(n, opts = {}) {
     else if (opts.focus) ed.focus();
   }
   if (opts.scrollTop != null) $('#main').scrollTop = opts.scrollTop;
+}
+/* ---------------- 上一步 / 下一步 ---------------- */
+const HIST = new Map();
+function hist(id) {
+  let h = HIST.get(id);
+  if (!h) { const n = node(id); h = {stack: [{text: n.text || '', s: 0, e: 0}], idx: 0, last: 0, kind: '', mustPush: false}; HIST.set(id, h); }
+  return h;
+}
+function recordHist(id, ed) {
+  const h = hist(id), now = Date.now(), text = ed.value;
+  const delta = text.length - h.stack[h.idx].text.length, kind = delta < 0 ? 'del' : 'ins';
+  const entry = {text, s: ed.selectionStart, e: ed.selectionEnd};
+  h.stack.length = h.idx + 1;
+  if (h.mustPush || h.idx === 0 || now - h.last > 1000 || Math.abs(delta) > 20 || kind !== h.kind) {
+    h.stack.push(entry); h.idx++;
+    if (h.stack.length > 300) { h.stack.shift(); h.idx--; }
+  } else h.stack[h.idx] = entry;
+  h.last = now; h.kind = kind; h.mustPush = false;
+  updateUndoBtns();
+}
+function applyHist(entry, prev) {
+  const n = node(S.currentId), ed = $('#ed'); if (!n || !ed) return;
+  ed.value = entry.text;
+  markDirty(n.id, entry.text); paintHl(); updateCounts(); if (S.hl) focusMark(false);
+  let i = 0; const a = prev, b = entry.text;
+  while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  if (document.activeElement === ed) { const end = i + Math.max(0, b.length - a.length); ed.setSelectionRange(i, end); }
+  scrollToIndex(i);
+  updateUndoBtns();
+}
+function undo() {
+  const h = S.currentId && HIST.get(S.currentId); if (!h || h.idx === 0) return;
+  const prev = h.stack[h.idx].text; h.idx--; h.mustPush = true; applyHist(h.stack[h.idx], prev);
+}
+function redo() {
+  const h = S.currentId && HIST.get(S.currentId); if (!h || h.idx >= h.stack.length - 1) return;
+  const prev = h.stack[h.idx].text; h.idx++; h.mustPush = true; applyHist(h.stack[h.idx], prev);
+}
+function updateUndoBtns() {
+  const h = S.currentId && HIST.get(S.currentId);
+  const u = document.querySelector('[data-act="undo"]'), r = document.querySelector('[data-act="redo"]');
+  if (u) u.disabled = !h || h.idx === 0;
+  if (r) r.disabled = !h || h.idx >= h.stack.length - 1;
+}
+function scrollToIndex(i) {
+  const bd = $('#bd'), n = node(S.currentId); if (!bd || !n) return;
+  const t = n.text || '';
+  bd.innerHTML = esc(t.slice(0, i)) + '<span id="cm"></span>' + esc(t.slice(i)) + ' ';
+  const cm = $('#cm'), main = $('#main');
+  const r = cm.getBoundingClientRect(), mr = main.getBoundingClientRect();
+  if (r.top < mr.top + 110 || r.bottom > mr.bottom - 40) main.scrollTop += r.top - mr.top - main.clientHeight / 3;
+  paintHl();
 }
 function markList() { const el = $('#reader') || $('#bd'); return el ? [...el.querySelectorAll('mark')] : []; }
 function paintHl() {
@@ -1127,7 +1192,7 @@ function focusMark(scroll) {
 function refreshDocText(n) {
   if (S.view !== 'node' || S.currentId !== n.id) return;
   const ed = $('#ed');
-  if (ed && document.activeElement !== ed) { ed.value = n.text || ''; paintHl(); focusMark(false); }
+  if (ed && document.activeElement !== ed) { ed.value = n.text || ''; const h = hist(n.id); h.mustPush = true; recordHist(n.id, ed); paintHl(); focusMark(false); }
   else if (!ed) renderMain();
   updateCounts();
 }
@@ -1307,6 +1372,8 @@ document.addEventListener('click', e => {
     if (act === 'rename') return run(() => actRename(id));
     if (act === 'back') { document.body.classList.remove('show-main'); return; }
     if (act === 'mode') return switchMode(actEl.dataset.m);
+    if (act === 'undo') return undo();
+    if (act === 'redo') return redo();
     if (act === 'typo') { const p = $('#typo'); if (!p.classList.contains('hidden')) { p.classList.add('hidden'); return; } return showTypo(actEl); }
     if (act === 'typoreset') { S.ui = {...UI_DEFAULT}; applyUi(); localStorage.setItem(UI_KEY, JSON.stringify(S.ui)); const b = document.querySelector('[data-act="typo"]'); if (b) showTypo(b); return; }
     if (act === 'hlnext') { S.hlIndex++; return focusMark(true); }
