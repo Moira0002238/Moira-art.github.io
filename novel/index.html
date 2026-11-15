@@ -6,17 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="小說筆記本">
-<meta name="theme-color" content="#efe8da">
+<meta name="theme-color" content="#ececec">
 <link rel="apple-touch-icon" href="icon.png">
 <title>小說筆記本</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#f8f4eb; --side:#efe8da; --line:#ddd3c0; --ink:#2b2620; --mute:#8a7f6e; --accent:#8a3b2e; --accent-soft:#f1dfd6;
-  --serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
-  --sans:system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  --paper:#f4f4f4; --side:#ececec; --line:#dcdcdc; --ink:#111; --mute:#777; --accent:#111; --accent-soft:#e6e6e6;
+  --serif:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --fs:18px; --ls:0.02; --lh:1.9; --mainbg:#f4f4f4;
   --k0:#ffe08a; --k1:#ffc2d1; --k2:#b9dcff; --k3:#c5efb8; --k4:#e2c8ff;
 }
 *{box-sizing:border-box}
@@ -27,7 +28,7 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* ---------- screens ---------- */
 .screen{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{max-width:440px;width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px 26px;box-shadow:0 6px 30px rgba(60,40,20,.06)}
+.card{max-width:440px;width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px 26px;box-shadow:0 6px 30px rgba(0,0,0,.05)}
 .card h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:0 0 6px}
 .card p{color:var(--mute);line-height:1.7;font-size:14.5px;margin:8px 0}
 .card input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin:10px 0;background:var(--paper)}
@@ -41,7 +42,8 @@ input,select,textarea{font:inherit;color:inherit}
 /* ---------- layout ---------- */
 #app{display:flex;height:100%;height:100dvh}
 #side{width:310px;flex:none;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-#main{flex:1;min-width:0;overflow:auto;-webkit-overflow-scrolling:touch;position:relative}
+#main{flex:1;min-width:0;overflow:auto;-webkit-overflow-scrolling:touch;position:relative;background:var(--mainbg)}
+#main.white{--mainbg:#fff}
 .side-head{padding:16px 14px 10px;padding-top:max(16px,env(safe-area-inset-top))}
 .brand{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .brand h1{font-family:var(--serif);font-size:20px;margin:0;font-weight:600;letter-spacing:.04em}
@@ -71,7 +73,7 @@ input,select,textarea{font:inherit;color:inherit}
 .empty{padding:28px 18px;color:var(--mute);font-size:14px;line-height:1.8;text-align:center}
 
 /* ---------- main pages ---------- */
-.topbar{position:sticky;top:0;z-index:5;background:rgba(248,244,235,.94);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:8px 16px;padding-top:max(8px,env(safe-area-inset-top));min-height:48px}
+.topbar{position:sticky;top:0;z-index:5;background:var(--mainbg);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:8px 16px;padding-top:max(8px,env(safe-area-inset-top));min-height:48px}
 .topbar .crumb{flex:1;min-width:0;font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .topbar .crumb a{color:inherit;text-decoration:none;cursor:pointer}
 .topbar .crumb a:hover{color:var(--accent)}
@@ -87,15 +89,16 @@ input,select,textarea{font:inherit;color:inherit}
 .dtitle:focus{border-bottom-color:var(--line)}
 .dcount{font-size:13px;color:var(--mute);margin:4px 0 22px}
 .dcount b{color:var(--ink);font-variant-numeric:tabular-nums}
-.text{font-family:var(--serif);font-size:18px;line-height:1.95;letter-spacing:.02em;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;padding:0;margin:0}
+.text{font-family:var(--serif);font-size:var(--fs);line-height:var(--lh);letter-spacing:calc(var(--ls) * 1em);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;padding:0;margin:0}
 .grow{display:grid}
-.grow::after{content:attr(data-v) " ";visibility:hidden;white-space:pre-wrap}
-.grow>textarea,.grow::after{grid-area:1/1/2/2;font-family:var(--serif);font-size:18px;line-height:1.95;letter-spacing:.02em;word-break:break-word;overflow-wrap:anywhere;padding:0 0 40vh;margin:0;border:none}
-.grow>textarea{resize:none;overflow:hidden;background:transparent;outline:none;min-height:50vh}
+.grow>*{grid-area:1/1/2/2;padding:0 0 40vh;margin:0;border:none;min-height:50vh}
+.grow>.backdrop{color:transparent;pointer-events:none;user-select:none;-webkit-user-select:none}
+.grow>.backdrop mark{padding:0;color:transparent}
+.grow>textarea{position:relative;z-index:1;resize:none;overflow:hidden;background:transparent;outline:none;color:var(--ink);caret-color:var(--ink)}
 .read{padding-bottom:40vh}
 mark{border-radius:3px;padding:0 1px;color:inherit}
 mark.k0{background:var(--k0)} mark.k1{background:var(--k1)} mark.k2{background:var(--k2)} mark.k3{background:var(--k3)} mark.k4{background:var(--k4)}
-mark.cur{outline:2px solid var(--accent);outline-offset:1px}
+mark.cur{outline:2px solid #111;outline-offset:1px}
 .findbar{position:sticky;top:48px;z-index:4;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border-bottom:1px solid var(--line);padding:7px 16px;font-size:13px}
 .findbar .n{font-variant-numeric:tabular-nums;color:var(--mute)}
 .chip{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 9px;font-size:12.5px}
@@ -108,46 +111,58 @@ h2.ptitle{font-family:var(--serif);font-size:30px;font-weight:600;margin:4px 0 1
 .stat span{font-size:12.5px;color:var(--mute)}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
 .list{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.li{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid #efe9dd;cursor:pointer}
+.li{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid #eeeeee;cursor:pointer}
 .li:first-child{border-top:none}
-.li:hover{background:#fbf8f2}
+.li:hover{background:#f7f7f7}
 .li .ic{width:20px;text-align:center;color:var(--mute);flex:none}
 .li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.li .bar{width:90px;height:5px;background:#f0ebe0;border-radius:4px;overflow:hidden;flex:none}
-.li .bar i{display:block;height:100%;background:#d6b9a8}
+.li .bar{width:90px;height:5px;background:#eeeeee;border-radius:4px;overflow:hidden;flex:none}
+.li .bar i{display:block;height:100%;background:#9a9a9a}
 .li .wc{width:76px;text-align:right;font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums;flex:none}
 
+.dochead{position:sticky;top:0;z-index:5;background:#fff}
+.dochead .topbar{position:static;background:#fff}
+.findrow{display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--line);padding:6px 16px;background:#fff}
+.findrow .fi{flex:1;min-width:0;max-width:460px;display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:8px;padding:0 8px;background:#f7f7f7;color:var(--mute)}
+.findrow .fi:focus-within{border-color:#111;background:#fff}
+.findrow input{border:none;outline:none;background:transparent;padding:6px 4px;flex:1;min-width:0;font-size:14px;color:var(--ink)}
+.findrow .n{font-size:12.5px;color:var(--mute);min-width:48px;flex:none;text-align:center;font-variant-numeric:tabular-nums}
+.aa{padding:4px 10px;font-weight:700}
+#typo{position:fixed;z-index:50;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:12px 14px;width:290px;max-width:calc(100vw - 16px)}
+.trow{display:grid;grid-template-columns:40px 1fr 64px;align-items:center;gap:8px;margin:8px 0;font-size:13.5px}
+.trow input{width:100%;accent-color:#111}
+.trow b{font-weight:500;font-variant-numeric:tabular-nums;text-align:right;font-size:12.5px}
 /* search results */
 .res{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
-.res-h{display:flex;align-items:baseline;gap:8px;padding:10px 14px;border-bottom:1px solid #efe9dd;cursor:pointer}
-.res-h:hover{background:#fbf8f2}
+.res-h{display:flex;align-items:baseline;gap:8px;padding:10px 14px;border-bottom:1px solid #eeeeee;cursor:pointer}
+.res-h:hover{background:#f7f7f7}
 .res-h .nm{font-weight:600}
 .res-h .path{font-size:12px;color:var(--mute);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .res-h .cnt{font-size:12px;color:var(--accent);white-space:nowrap}
-.snip{padding:9px 14px;font-family:var(--serif);font-size:15px;line-height:1.8;border-top:1px dashed #efe9dd;cursor:pointer}
+.snip{padding:9px 14px;font-family:var(--serif);font-size:15px;line-height:1.8;border-top:1px dashed #eeeeee;cursor:pointer}
 .snip:first-of-type{border-top:none}
-.snip:hover{background:#fbf8f2}
-.snip .nl{color:#c9bda8;font-size:12px;margin:0 2px}
+.snip:hover{background:#f7f7f7}
+.snip .nl{color:#bbbbbb;font-size:12px;margin:0 2px}
 .more-n{padding:6px 14px 10px;font-size:12.5px;color:var(--mute)}
 .sum{font-size:14px;color:var(--mute);margin:0 0 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 
 /* menu / modal / toast */
-#menu{position:fixed;z-index:50;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(40,30,20,.16);padding:5px;min-width:170px}
+#menu{position:fixed;z-index:50;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:5px;min-width:170px}
 #menu button{display:block;width:100%;text-align:left;border:none;background:none;padding:8px 12px;border-radius:7px;font-size:14px}
 #menu button:hover{background:var(--paper)}
 #menu button.danger{color:#b3261e}
-#menu hr{border:none;border-top:1px solid #efe9dd;margin:4px 0}
-#modal{position:fixed;inset:0;z-index:60;background:rgba(40,30,20,.35);display:flex;align-items:center;justify-content:center;padding:20px}
+#menu hr{border:none;border-top:1px solid #eeeeee;margin:4px 0}
+#modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;padding:20px}
 #modal .box{background:#fff;border-radius:14px;max-width:420px;width:100%;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.2);max-height:85vh;display:flex;flex-direction:column}
 #modal h3{margin:0 0 8px;font-size:17px}
 #modal p{margin:0 0 12px;color:var(--mute);font-size:14px;line-height:1.7;white-space:pre-line}
 #modal input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:16px}
 #modal .btns{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 #modal .opts{overflow:auto;margin-bottom:14px;border:1px solid var(--line);border-radius:8px}
-#modal .opt{display:block;width:100%;text-align:left;border:none;border-top:1px solid #efe9dd;background:#fff;padding:9px 12px;font-size:14px}
+#modal .opt{display:block;width:100%;text-align:left;border:none;border-top:1px solid #eeeeee;background:#fff;padding:9px 12px;font-size:14px}
 #modal .opt:first-child{border-top:none}
 #modal .opt:hover{background:var(--paper)}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#2b2620;color:#fff;padding:9px 16px;border-radius:9px;font-size:14px;z-index:70;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;padding:9px 16px;border-radius:9px;font-size:14px;z-index:70;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.2)}
 #authbar{position:fixed;top:0;left:0;right:0;z-index:40;background:#fff4d6;border-bottom:1px solid #e8d49a;padding:9px 14px;padding-top:max(9px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;flex-wrap:wrap}
 .loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--mute);font-size:14px;background:var(--paper);z-index:30}
 .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite}
@@ -155,13 +170,15 @@ h2.ptitle{font-family:var(--serif);font-size:30px;font-weight:600;margin:4px 0 1
 
 @media (max-width:820px){
   #side{position:fixed;inset:0;width:auto;border-right:none}
-  #main{position:fixed;inset:0;background:var(--paper);transform:translateX(100%);transition:transform .22s ease;z-index:10}
+  #main{position:fixed;inset:0;background:var(--mainbg);transform:translateX(100%);transition:transform .22s ease;z-index:10}
   body.show-main #main{transform:none}
   .back{display:inline-flex}
   .sheet{padding:18px 18px 120px}
   .page{padding:20px 16px 80px}
   .dtitle{font-size:23px}
-  .text,.grow>textarea,.grow::after{font-size:17px}
+  .findrow input{font-size:16px}
+  .findrow{padding:6px 10px}
+  .findrow .iconbtn{padding:4px 6px}
   .li .bar{display:none}
   .row{min-height:40px}
   .searchbox input{font-size:16px}
@@ -217,6 +234,7 @@ h2.ptitle{font-family:var(--serif);font-size:30px;font-weight:600;margin:4px 0 1
 </div>
 
 <div id="menu" class="hidden"></div>
+<div id="typo" class="hidden"></div>
 <div id="modal" class="hidden"></div>
 <div id="toast" class="hidden"></div>
 <div id="authbar" class="hidden"><span>Google 連線已過期，剛寫的內容已暫存在這台裝置。</span><button class="btn primary" id="reauth">重新連線</button></div>
@@ -464,6 +482,28 @@ const S = {
   expanded: new Set(JSON.parse(localStorage.getItem(DEMO ? 'nn_exp_demo' : 'nn_exp') || '[]')),
   lastSync: 0,
 };
+const UI_KEY = DEMO ? 'nn_ui_demo' : 'nn_ui';
+const UI_DEFAULT = {fs: 18, ls: 0.02, lh: 1.9};
+S.ui = Object.assign({}, UI_DEFAULT, JSON.parse(localStorage.getItem(UI_KEY) || '{}'));
+function applyUi() { const r = document.documentElement.style; r.setProperty('--fs', S.ui.fs + 'px'); r.setProperty('--ls', S.ui.ls); r.setProperty('--lh', S.ui.lh); }
+applyUi();
+const UI_FMT = {fs: v => v + ' px', ls: v => (+v).toFixed(2) + ' 字', lh: v => (+v).toFixed(1) + ' 倍'};
+function showTypo(anchor) {
+  const p = $('#typo');
+  const row = (k, label, min, max, step) => `<div class="trow"><span>${label}</span><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${S.ui[k]}"><b data-v="${k}">${UI_FMT[k](S.ui[k])}</b></div>`;
+  p.innerHTML = row('fs', '字級', 12, 32, 1) + row('ls', '字距', 0, 0.3, 0.01) + row('lh', '行距', 1.2, 3, 0.1)
+    + `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px;color:var(--mute)"><span>只套用在這台裝置</span><button class="linkbtn" data-act="typoreset">恢復預設</button></div>`;
+  p.classList.remove('hidden');
+  const r = anchor.getBoundingClientRect();
+  p.style.left = Math.max(8, Math.min(r.right - p.offsetWidth, innerWidth - p.offsetWidth - 8)) + 'px';
+  p.style.top = (r.bottom + 6) + 'px';
+  p.oninput = e => {
+    const k = e.target.dataset.k; if (!k) return;
+    S.ui[k] = +e.target.value; p.querySelector(`[data-v="${k}"]`).textContent = UI_FMT[k](S.ui[k]);
+    applyUi(); localStorage.setItem(UI_KEY, JSON.stringify(S.ui));
+    if (S.hl) focusMark(false);
+  };
+}
 const saveExpanded = () => localStorage.setItem(DEMO ? 'nn_exp_demo' : 'nn_exp', JSON.stringify([...S.expanded]));
 const node = id => S.nodes.get(id);
 const dispName = n => n.type === 'doc' ? n.name.replace(/\.txt$/i, '') : n.name;
@@ -929,6 +969,7 @@ function openNode(id, opts = {}) {
 }
 function renderMain(opts = {}) {
   const m = $('#main');
+  m.classList.remove('white');
   if (S.view === 'search') return renderSearch();
   const n = S.currentId && node(S.currentId);
   if (!n) {
@@ -980,51 +1021,74 @@ function highlightHtml(text, kws, withPos) {
   return out + esc(text.slice(last));
 }
 function renderDoc(n, opts = {}) {
-  const book = bookOf(n.id);
-  const read = S.mode === 'read';
+  const book = bookOf(n.id), read = S.mode === 'read';
+  $('#main').classList.add('white');
   $('#main').innerHTML = `
-  <div class="topbar"><button class="back" data-act="back">‹ 目錄</button><div class="crumb">${crumbHtml(n.id)}</div>
-    <span class="savest"></span>
-    <div class="seg"><button data-act="mode" data-m="edit" class="${read ? '' : 'on'}">編輯</button><button data-act="mode" data-m="read" class="${read ? 'on' : ''}">閱讀</button></div>
+  <div class="dochead">
+    <div class="topbar"><button class="back" data-act="back">‹ 目錄</button><div class="crumb">${crumbHtml(n.id)}</div>
+      <span class="savest"></span>
+      <button class="btn aa" data-act="typo" title="字級、字距、行距">Aa</button>
+      <div class="seg"><button data-act="mode" data-m="edit" class="${read ? '' : 'on'}">編輯</button><button data-act="mode" data-m="read" class="${read ? 'on' : ''}">閱讀</button></div>
+    </div>
+    <div class="findrow">
+      <label class="fi"><span>⌕</span><input id="findIn" type="search" placeholder="在這一章裡搜尋" enterkeyhint="search" autocomplete="off"></label>
+      <span class="n" id="hlN"></span>
+      <button class="iconbtn" data-act="hlprev" title="上一個">▲</button><button class="iconbtn" data-act="hlnext" title="下一個">▼</button>
+    </div>
   </div>
-  ${S.hl ? `<div class="findbar">${S.hl.map((k, i) => `<span class="chip k${i % 5}">${esc(k)}</span>`).join('')}
-    <span class="n" id="hlN"></span>
-    <button class="btn" data-act="hlprev">▲ 上一個</button><button class="btn" data-act="hlnext">▼ 下一個</button>
-    <button class="linkbtn" data-act="hlclear">清除標示</button></div>` : ''}
   <div class="sheet">
     <input class="dtitle" id="dtitle" value="${esc(dispName(n))}" aria-label="章節名稱">
-    <div class="dcount">本章 <b id="wcDoc">${fmt(n.wc)}</b> 字　・　${book.id === n.id ? '' : `《${esc(book.name)}》全書 <b id="wcBook">${fmt(wordsOf(book.id))}</b> 字`}</div>
-    ${read
-      ? `<div class="text read" id="reader">${S.hl ? highlightHtml(n.text || '', S.hl, true) : esc(n.text || '')}</div>`
-      : `<div class="grow" id="grow"><textarea id="ed" class="text" placeholder="開始寫吧……" spellcheck="false"></textarea></div>`}
+    <div class="dcount">本章 <b id="wcDoc">${fmt(n.wc)}</b> 字${book.id === n.id ? '' : `　・　《${esc(book.name)}》全書 <b id="wcBook">${fmt(wordsOf(book.id))}</b> 字`}</div>
+    ${read ? `<div class="text read" id="reader"></div>`
+      : `<div class="grow"><div class="text backdrop" id="bd" aria-hidden="true"></div><textarea id="ed" class="text" placeholder="開始寫吧……" spellcheck="false"></textarea></div>`}
   </div>`;
   setStatus($('#status').textContent);
   const t = $('#dtitle');
   t.addEventListener('change', () => run(() => renameNode(n.id, t.value)));
   t.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); t.blur(); } });
+  const fi = $('#findIn');
+  fi.value = (S.hl || []).join(' ');
+  let ft = null;
+  const applyFind = () => {
+    clearTimeout(ft);
+    const k = [...new Set(fi.value.trim().split(/\s+/).filter(Boolean))].slice(0, 10);
+    const next = k.length ? k : null;
+    if (JSON.stringify(next) === JSON.stringify(S.hl)) return false;
+    S.hl = next; S.hlIndex = 0; paintHl(); focusMark(true);
+    return true;
+  };
+  fi.addEventListener('input', () => { clearTimeout(ft); ft = setTimeout(applyFind, 200); });
+  fi.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); if (!applyFind()) { S.hlIndex += e.shiftKey ? -1 : 1; focusMark(true); } }
+    if (e.key === 'Escape') { fi.value = ''; applyFind(); fi.blur(); }
+  });
   if (!read) {
-    const ed = $('#ed'), grow = $('#grow');
-    ed.value = n.text || ''; grow.dataset.v = ed.value;
-    ed.addEventListener('input', () => { grow.dataset.v = ed.value; markDirty(n.id, ed.value); updateCounts(); });
-    if (opts.selectPos != null) {
-      requestAnimationFrame(() => {
-        ed.focus({preventScroll: true});
-        ed.setSelectionRange(opts.selectPos, opts.selectPos + (opts.selectLen || 0));
-        if (opts.scrollTop != null) $('#main').scrollTop = opts.scrollTop;
-      });
-    } else if (opts.focus) ed.focus();
-  } else if (S.hl) {
-    const marks = [...document.querySelectorAll('#reader mark')];
-    let idx = 0;
-    if (opts.pos != null) { const k = marks.findIndex(mk => +mk.dataset.pos >= opts.pos); idx = k < 0 ? 0 : k; }
-    S.hlIndex = idx; focusMark(true);
+    const ed = $('#ed');
+    ed.value = n.text || '';
+    ed.addEventListener('input', () => { markDirty(n.id, ed.value); paintHl(); updateCounts(); if (S.hl) focusMark(false); });
   }
+  paintHl();
+  if (S.hl && opts.pos != null) { const k = markList().findIndex(mk => +mk.dataset.pos >= opts.pos); S.hlIndex = k < 0 ? 0 : k; }
+  focusMark(!!S.hl && opts.scrollTop == null);
+  if (!read) {
+    const ed = $('#ed');
+    if (opts.selectPos != null) requestAnimationFrame(() => { ed.focus({preventScroll: true}); ed.setSelectionRange(opts.selectPos, opts.selectPos + (opts.selectLen || 0)); });
+    else if (opts.focus) ed.focus();
+  }
+  if (opts.scrollTop != null) $('#main').scrollTop = opts.scrollTop;
+}
+function markList() { const el = $('#reader') || $('#bd'); return el ? [...el.querySelectorAll('mark')] : []; }
+function paintHl() {
+  const n = S.currentId && node(S.currentId), el = $('#reader') || $('#bd');
+  if (!n || !el) return;
+  const t = n.text || '';
+  el.innerHTML = (S.hl ? highlightHtml(t, S.hl, true) : esc(t)) + (el.id === 'bd' ? ' ' : '');
 }
 function focusMark(scroll) {
-  const marks = [...document.querySelectorAll('#reader mark')];
-  const n = $('#hlN');
-  if (!marks.length) { if (n) n.textContent = '這篇沒有符合的地方'; return; }
-  S.hlIndex = (S.hlIndex + marks.length) % marks.length;
+  const marks = markList(), n = $('#hlN');
+  if (!S.hl) { if (n) n.textContent = ''; return; }
+  if (!marks.length) { if (n) n.textContent = '沒有符合'; return; }
+  S.hlIndex = ((S.hlIndex % marks.length) + marks.length) % marks.length;
   marks.forEach((m, i) => m.classList.toggle('cur', i === S.hlIndex));
   if (n) n.textContent = `${S.hlIndex + 1} / ${marks.length}`;
   if (scroll) {
@@ -1036,21 +1100,17 @@ function focusMark(scroll) {
 function refreshDocText(n) {
   if (S.view !== 'node' || S.currentId !== n.id) return;
   const ed = $('#ed');
-  if (ed && document.activeElement !== ed) { ed.value = n.text || ''; $('#grow').dataset.v = ed.value; }
+  if (ed && document.activeElement !== ed) { ed.value = n.text || ''; paintHl(); focusMark(false); }
   else if (!ed) renderMain();
   updateCounts();
 }
 function switchMode(m) {
   const n = node(S.currentId); if (!n || S.mode === m) return;
-  const main = $('#main'), st = main.scrollTop;
+  const st = $('#main').scrollTop;
   let sel = null;
-  if (m === 'edit') {
-    const cur = document.querySelector('#reader mark.cur');
-    if (cur) sel = {selectPos: +cur.dataset.pos, selectLen: +cur.dataset.len};
-  }
+  if (m === 'edit') { const cur = document.querySelector('#reader mark.cur'); if (cur) sel = {selectPos: +cur.dataset.pos, selectLen: +cur.dataset.len}; }
   S.mode = m;
-  renderDoc(n, sel ? {...sel, scrollTop: st} : {});
-  if (!sel) main.scrollTop = st;
+  renderDoc(n, {...(sel || {}), scrollTop: st});
 }
 
 /* ---------------- 搜尋 ---------------- */
@@ -1063,6 +1123,7 @@ function runSearch() {
   renderSearch(); renderTree();
 }
 function renderSearch() {
+  $('#main').classList.remove('white');
   const kws = keywords(), scope = $('#scope').value;
   const docs = scope === 'all' ? docsUnder(S.rootId) : docsUnder(scope);
   const re = hlRegex(kws), map = new Map(kws.map((k, i) => [k.toLowerCase(), i % 5]));
@@ -1203,6 +1264,7 @@ async function actDelete(id) {
 /* ---------------- 事件 ---------------- */
 document.addEventListener('click', e => {
   if (!e.target.closest('#menu') && !e.target.closest('[data-act="menu"]') && !e.target.closest('[data-act="sysmenu"]')) hideMenu();
+  if (!e.target.closest('#typo') && !e.target.closest('[data-act="typo"]')) $('#typo').classList.add('hidden');
   const actEl = e.target.closest('[data-act]');
   const row = e.target.closest('#tree .row[data-id]');
   if (actEl) {
@@ -1218,6 +1280,8 @@ document.addEventListener('click', e => {
     if (act === 'rename') return run(() => actRename(id));
     if (act === 'back') { document.body.classList.remove('show-main'); return; }
     if (act === 'mode') return switchMode(actEl.dataset.m);
+    if (act === 'typo') { const p = $('#typo'); if (!p.classList.contains('hidden')) { p.classList.add('hidden'); return; } return showTypo(actEl); }
+    if (act === 'typoreset') { S.ui = {...UI_DEFAULT}; applyUi(); localStorage.setItem(UI_KEY, JSON.stringify(S.ui)); const b = document.querySelector('[data-act="typo"]'); if (b) showTypo(b); return; }
     if (act === 'hlnext') { S.hlIndex++; return focusMark(true); }
     if (act === 'hlprev') { S.hlIndex--; return focusMark(true); }
     if (act === 'hlclear') { S.hl = null; return renderMain(); }
@@ -1235,7 +1299,7 @@ document.addEventListener('click', e => {
   const hit = e.target.closest('[data-hit]');
   if (hit) {
     S.hl = keywords(); S.view = 'node';
-    openNode(hit.dataset.hit, {mode: 'read', keepHl: true, pos: hit.dataset.pos === '' ? null : +hit.dataset.pos});
+    openNode(hit.dataset.hit, {mode: 'edit', keepHl: true, pos: hit.dataset.pos === '' ? null : +hit.dataset.pos});
   }
 });
 $('#q').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 250); });
