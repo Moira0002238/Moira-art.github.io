@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="小說筆記本">
+<meta name="theme-color" content="#efe8da">
+<link rel="apple-touch-icon" href="icon.png">
+<title>小說筆記本</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f8f4eb; --side:#efe8da; --line:#ddd3c0; --ink:#2b2620; --mute:#8a7f6e; --accent:#8a3b2e; --accent-soft:#f1dfd6;
+  --serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --sans:system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  --k0:#ffe08a; --k1:#ffc2d1; --k2:#b9dcff; --k3:#c5efb8; --k4:#e2c8ff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+.hidden{display:none!important}
+
+/* ---------- screens ---------- */
+.screen{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{max-width:440px;width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px 26px;box-shadow:0 6px 30px rgba(60,40,20,.06)}
+.card h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:0 0 6px}
+.card p{color:var(--mute);line-height:1.7;font-size:14.5px;margin:8px 0}
+.card input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin:10px 0;background:var(--paper)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 14px;font-size:14px;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:#b3261e}
+.btn.big{padding:12px 18px;font-size:15px;width:100%;margin-top:8px}
+.linkbtn{background:none;border:none;color:var(--accent);padding:0;text-decoration:underline;font-size:14px}
+
+/* ---------- layout ---------- */
+#app{display:flex;height:100%;height:100dvh}
+#side{width:310px;flex:none;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+#main{flex:1;min-width:0;overflow:auto;-webkit-overflow-scrolling:touch;position:relative}
+.side-head{padding:16px 14px 10px;padding-top:max(16px,env(safe-area-inset-top))}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.brand h1{font-family:var(--serif);font-size:20px;margin:0;font-weight:600;letter-spacing:.04em}
+.searchbox{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.searchbox .q{display:flex;align-items:center;background:#fff;border:1px solid var(--line);border-radius:9px;padding:0 10px}
+.searchbox .q:focus-within{border-color:var(--accent)}
+.searchbox input{border:none;outline:none;background:transparent;padding:9px 6px;flex:1;min-width:0;font-size:15px}
+.searchbox select{border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px 8px;font-size:13.5px}
+.searchbox small{color:var(--mute);font-size:12px}
+#tree{flex:1;overflow:auto;padding:4px 6px 12px;-webkit-overflow-scrolling:touch}
+.row{display:flex;align-items:center;gap:2px;padding:5px 4px 5px calc(4px + var(--d,0) * 16px);border-radius:7px;cursor:pointer;user-select:none;-webkit-user-select:none;min-height:34px}
+.row:hover{background:rgba(255,255,255,.55)}
+.row.active{background:#fff;box-shadow:inset 3px 0 0 var(--accent)}
+.row .tw{width:22px;height:22px;border:none;background:none;padding:0;color:var(--mute);flex:none;font-size:12px}
+.row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14.5px}
+.row.folder>.nm{font-weight:600}
+.row.d0>.nm{font-family:var(--serif);font-size:15.5px}
+.row .wc{font-size:11.5px;color:var(--mute);font-variant-numeric:tabular-nums;flex:none;margin-left:6px}
+.row .more{border:none;background:none;width:28px;height:26px;border-radius:6px;color:var(--mute);flex:none;font-size:16px;line-height:1}
+.row .more:hover{background:rgba(0,0,0,.06)}
+.row.hint{color:var(--mute);font-size:12.5px;cursor:default;min-height:26px;padding-left:calc(30px + var(--d,0) * 16px)}
+.side-foot{border-top:1px solid var(--line);padding:9px 12px;padding-bottom:max(9px,env(safe-area-inset-bottom));font-size:12.5px;color:var(--mute);display:flex;align-items:center;gap:8px}
+.side-foot .tot{flex:1}
+.side-foot b{color:var(--ink);font-variant-numeric:tabular-nums}
+.iconbtn{border:none;background:none;border-radius:7px;padding:4px 8px;color:var(--mute);font-size:15px}
+.iconbtn:hover{background:rgba(0,0,0,.06);color:var(--ink)}
+.empty{padding:28px 18px;color:var(--mute);font-size:14px;line-height:1.8;text-align:center}
+
+/* ---------- main pages ---------- */
+.topbar{position:sticky;top:0;z-index:5;background:rgba(248,244,235,.94);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:8px 16px;padding-top:max(8px,env(safe-area-inset-top));min-height:48px}
+.topbar .crumb{flex:1;min-width:0;font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topbar .crumb a{color:inherit;text-decoration:none;cursor:pointer}
+.topbar .crumb a:hover{color:var(--accent)}
+.savest{font-size:12px;color:var(--mute);white-space:nowrap}
+.savest.warn{color:#b3261e}
+.back{display:none;border:none;background:none;font-size:15px;color:var(--accent);padding:4px 4px 4px 0;white-space:nowrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;flex:none}
+.seg button{border:none;background:none;padding:5px 11px;font-size:13px}
+.seg button.on{background:var(--accent);color:#fff}
+.page{max-width:820px;margin:0 auto;padding:28px 24px 80px}
+.sheet{max-width:760px;margin:0 auto;padding:26px 28px 120px}
+.dtitle{width:100%;border:none;background:transparent;font-family:var(--serif);font-size:28px;font-weight:600;padding:4px 0;outline:none;border-bottom:1px dashed transparent}
+.dtitle:focus{border-bottom-color:var(--line)}
+.dcount{font-size:13px;color:var(--mute);margin:4px 0 22px}
+.dcount b{color:var(--ink);font-variant-numeric:tabular-nums}
+.text{font-family:var(--serif);font-size:18px;line-height:1.95;letter-spacing:.02em;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;padding:0;margin:0}
+.grow{display:grid}
+.grow::after{content:attr(data-v) " ";visibility:hidden;white-space:pre-wrap}
+.grow>textarea,.grow::after{grid-area:1/1/2/2;font-family:var(--serif);font-size:18px;line-height:1.95;letter-spacing:.02em;word-break:break-word;overflow-wrap:anywhere;padding:0 0 40vh;margin:0;border:none}
+.grow>textarea{resize:none;overflow:hidden;background:transparent;outline:none;min-height:50vh}
+.read{padding-bottom:40vh}
+mark{border-radius:3px;padding:0 1px;color:inherit}
+mark.k0{background:var(--k0)} mark.k1{background:var(--k1)} mark.k2{background:var(--k2)} mark.k3{background:var(--k3)} mark.k4{background:var(--k4)}
+mark.cur{outline:2px solid var(--accent);outline-offset:1px}
+.findbar{position:sticky;top:48px;z-index:4;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border-bottom:1px solid var(--line);padding:7px 16px;font-size:13px}
+.findbar .n{font-variant-numeric:tabular-nums;color:var(--mute)}
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 9px;font-size:12.5px}
+.chip.k0{background:var(--k0)} .chip.k1{background:var(--k1)} .chip.k2{background:var(--k2)} .chip.k3{background:var(--k3)} .chip.k4{background:var(--k4)}
+
+h2.ptitle{font-family:var(--serif);font-size:30px;font-weight:600;margin:4px 0 14px;cursor:text}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 18px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 18px;min-width:120px}
+.stat b{display:block;font-size:24px;font-variant-numeric:tabular-nums;font-family:var(--serif)}
+.stat span{font-size:12.5px;color:var(--mute)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.list{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.li{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid #efe9dd;cursor:pointer}
+.li:first-child{border-top:none}
+.li:hover{background:#fbf8f2}
+.li .ic{width:20px;text-align:center;color:var(--mute);flex:none}
+.li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li .bar{width:90px;height:5px;background:#f0ebe0;border-radius:4px;overflow:hidden;flex:none}
+.li .bar i{display:block;height:100%;background:#d6b9a8}
+.li .wc{width:76px;text-align:right;font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums;flex:none}
+
+/* search results */
+.res{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.res-h{display:flex;align-items:baseline;gap:8px;padding:10px 14px;border-bottom:1px solid #efe9dd;cursor:pointer}
+.res-h:hover{background:#fbf8f2}
+.res-h .nm{font-weight:600}
+.res-h .path{font-size:12px;color:var(--mute);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.res-h .cnt{font-size:12px;color:var(--accent);white-space:nowrap}
+.snip{padding:9px 14px;font-family:var(--serif);font-size:15px;line-height:1.8;border-top:1px dashed #efe9dd;cursor:pointer}
+.snip:first-of-type{border-top:none}
+.snip:hover{background:#fbf8f2}
+.snip .nl{color:#c9bda8;font-size:12px;margin:0 2px}
+.more-n{padding:6px 14px 10px;font-size:12.5px;color:var(--mute)}
+.sum{font-size:14px;color:var(--mute);margin:0 0 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* menu / modal / toast */
+#menu{position:fixed;z-index:50;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(40,30,20,.16);padding:5px;min-width:170px}
+#menu button{display:block;width:100%;text-align:left;border:none;background:none;padding:8px 12px;border-radius:7px;font-size:14px}
+#menu button:hover{background:var(--paper)}
+#menu button.danger{color:#b3261e}
+#menu hr{border:none;border-top:1px solid #efe9dd;margin:4px 0}
+#modal{position:fixed;inset:0;z-index:60;background:rgba(40,30,20,.35);display:flex;align-items:center;justify-content:center;padding:20px}
+#modal .box{background:#fff;border-radius:14px;max-width:420px;width:100%;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.2);max-height:85vh;display:flex;flex-direction:column}
+#modal h3{margin:0 0 8px;font-size:17px}
+#modal p{margin:0 0 12px;color:var(--mute);font-size:14px;line-height:1.7;white-space:pre-line}
+#modal input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;font-size:16px}
+#modal .btns{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+#modal .opts{overflow:auto;margin-bottom:14px;border:1px solid var(--line);border-radius:8px}
+#modal .opt{display:block;width:100%;text-align:left;border:none;border-top:1px solid #efe9dd;background:#fff;padding:9px 12px;font-size:14px}
+#modal .opt:first-child{border-top:none}
+#modal .opt:hover{background:var(--paper)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#2b2620;color:#fff;padding:9px 16px;border-radius:9px;font-size:14px;z-index:70;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+#authbar{position:fixed;top:0;left:0;right:0;z-index:40;background:#fff4d6;border-bottom:1px solid #e8d49a;padding:9px 14px;padding-top:max(9px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;flex-wrap:wrap}
+.loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--mute);font-size:14px;background:var(--paper);z-index:30}
+.spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media (max-width:820px){
+  #side{position:fixed;inset:0;width:auto;border-right:none}
+  #main{position:fixed;inset:0;background:var(--paper);transform:translateX(100%);transition:transform .22s ease;z-index:10}
+  body.show-main #main{transform:none}
+  .back{display:inline-flex}
+  .sheet{padding:18px 18px 120px}
+  .page{padding:20px 16px 80px}
+  .dtitle{font-size:23px}
+  .text,.grow>textarea,.grow::after{font-size:17px}
+  .li .bar{display:none}
+  .row{min-height:40px}
+  .searchbox input{font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- 設定畫面 -->
+<div id="setup" class="screen hidden">
+  <div class="card">
+    <h1>小說筆記本</h1>
+    <p>第一次使用要先填入 Google 的「用戶端 ID」（Client ID），讓網頁可以把資料存進你的 Google 雲端硬碟。</p>
+    <input id="cidInput" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
+    <button class="btn primary big" id="cidSave">儲存</button>
+    <p style="margin-top:16px"><button class="linkbtn" id="toDemo">先看示範版（資料不會儲存）</button></p>
+  </div>
+</div>
+
+<!-- 登入畫面 -->
+<div id="login" class="screen hidden">
+  <div class="card">
+    <h1>小說筆記本</h1>
+    <p>你的小說會存在自己的 Google 雲端硬碟「小說筆記本」資料夾裡，電腦和手機登入同一個帳號就會同步。</p>
+    <button class="btn primary big" id="loginBtn">用 Google 帳號登入</button>
+    <p id="loginErr" style="color:#b3261e"></p>
+  </div>
+</div>
+
+<div id="loading" class="loading hidden"><div class="spin"></div><div id="loadingText">載入中…</div></div>
+
+<div id="app" class="hidden">
+  <aside id="side">
+    <div class="side-head">
+      <div class="brand">
+        <h1>小說筆記本</h1>
+        <button class="btn" data-act="newbook">＋ 新書</button>
+      </div>
+      <div class="searchbox">
+        <div class="q"><span style="color:var(--mute)">⌕</span><input id="q" type="search" placeholder="搜尋（多個關鍵字用空格隔開）" enterkeyhint="search"></div>
+        <select id="scope"></select>
+      </div>
+    </div>
+    <div id="tree"></div>
+    <div class="side-foot">
+      <span class="tot">全部 <b id="totalWc">0</b> 字</span>
+      <span id="status"></span>
+      <button class="iconbtn" data-act="sync" title="重新同步">⟳</button>
+      <button class="iconbtn" data-act="sysmenu" title="更多">⋯</button>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div id="menu" class="hidden"></div>
+<div id="modal" class="hidden"></div>
+<div id="toast" class="hidden"></div>
+<div id="authbar" class="hidden"><span>Google 連線已過期，剛寫的內容已暫存在這台裝置。</span><button class="btn primary" id="reauth">重新連線</button></div>
+<input type="file" id="fileIn" multiple accept=".txt,.md,.docx,text/plain" class="hidden">
+
+<script>
+/* =========================================================
+   設定：Google Cloud 的 OAuth 用戶端 ID
+   ========================================================= */
+const CLIENT_ID = '';
+
+const SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const FOLDER_MIME = 'application/vnd.google-apps.folder';
+const DEMO = new URLSearchParams(location.search).has('demo');
+const MAMMOTH = 'https://cdn.jsdelivr.net/npm/mammoth@1.13.0/mammoth.browser.min.js';
+
+/* ---------------- 小工具 ---------------- */
+const $ = (s, el = document) => el.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => (n || 0).toLocaleString('zh-TW');
+const CJK = /[㐀-䶿一-鿿豈-﫿぀-ヿ가-힯\u{20000}-\u{2fa1f}]/gu;
+const WORD = /[A-Za-z0-9]+(?:['’][A-Za-z]+)*/g;
+/** 字數：中日韓文字每字算 1，英文單字/數字每組算 1，標點和空白不算 */
+function countWords(t) {
+  if (!t) return 0;
+  const c = (t.match(CJK) || []).length;
+  const w = (t.replace(CJK, ' ').match(WORD) || []).length;
+  return c + w;
+}
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+async function pool(items, n, fn) {
+  let i = 0;
+  await Promise.all(Array.from({length: Math.min(n, items.length)}, async () => {
+    while (i < items.length) { const it = items[i++]; await fn(it); }
+  }));
+}
+const CN = {'零':0,'〇':0,'一':1,'二':2,'兩':2,'两':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9};
+function cnNum(s) {
+  if (/^\d+$/.test(s)) return +s;
+  let total = 0, cur = 0;
+  for (const ch of s) {
+    if (ch in CN) cur = CN[ch];
+    else if (ch === '十') { total += (cur || 1) * 10; cur = 0; }
+    else if (ch === '百') { total += (cur || 1) * 100; cur = 0; }
+    else if (ch === '千') { total += (cur || 1) * 1000; cur = 0; }
+  }
+  return total + cur;
+}
+/** 匯入時排序用：「第十二章」→ 12 */
+function chapterKey(name) {
+  const m = name.match(/第\s*([0-9零〇一二兩两三四五六七八九十百千]+)\s*[章回節节卷部集話话篇]/);
+  return m ? cnNum(m[1]) : null;
+}
+function toCn(n) {
+  const d = '零一二三四五六七八九';
+  if (n < 10) return d[n];
+  if (n < 20) return '十' + (n % 10 ? d[n % 10] : '');
+  let out = '', zero = false;
+  for (const [v, u] of [[1000, '千'], [100, '百'], [10, '十'], [1, '']]) {
+    const q = Math.floor(n / v) % 10;
+    if (q) { if (zero && out) out += '零'; out += d[q] + u; zero = false; } else if (out) zero = true;
+  }
+  return out;
+}
+/** 依照同一層最後一個「第N章」推測下一章的名字，沿用國字或數字的寫法 */
+function suggestChapterName(pid) {
+  let best = null;
+  for (const c of node(pid).children) {
+    const n = node(c); if (n.type !== 'doc') continue;
+    const m = dispName(n).match(/第\s*([0-9零〇一二兩两三四五六七八九十百千]+)\s*([章回節节話话篇])/);
+    if (m && (!best || cnNum(m[1]) >= best.k)) best = {k: cnNum(m[1]), digit: /^\d+$/.test(m[1]), unit: m[2]};
+  }
+  if (!best) return '第一章';
+  const k = best.k + 1;
+  return `第${best.digit ? k : toCn(k)}${best.unit}`;
+}
+function sortFilesByChapter(files) {
+  return files.slice().sort((a, b) => {
+    const ka = chapterKey(a.name), kb = chapterKey(b.name);
+    if (ka != null && kb != null && ka !== kb) return ka - kb;
+    return a.name.localeCompare(b.name, 'zh-Hant', {numeric: true});
+  });
+}
+
+/* ---------------- 本機暫存（IndexedDB） ---------------- */
+const idb = (() => {
+  let dbp;
+  const open = () => dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open(DEMO ? 'novel-notebook-demo' : 'novel-notebook', 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore('cache'); r.result.createObjectStore('drafts'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  }));
+  const tx = async (store, mode, fn) => {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const t = db.transaction(store, mode); const req = fn(t.objectStore(store));
+      t.oncomplete = () => res(req && req.result); t.onerror = () => rej(t.error);
+    });
+  };
+  const safe = p => p.catch(() => undefined);
+  return {
+    get: (s, k) => safe(tx(s, 'readonly', st => st.get(k))),
+    set: (s, k, v) => safe(tx(s, 'readwrite', st => st.put(v, k))),
+    del: (s, k) => safe(tx(s, 'readwrite', st => st.delete(k))),
+    keys: s => safe(tx(s, 'readonly', st => st.getAllKeys())).then(x => x || []),
+  };
+})();
+
+/* ---------------- Google 登入 ---------------- */
+class AuthError extends Error {}
+let token = null, tokenExp = 0, tokenClient = null, tokenWaiters = [];
+const clientId = () => CLIENT_ID || localStorage.getItem('nn_client_id') || '';
+try { const t = JSON.parse(localStorage.getItem('nn_tok') || 'null'); if (t && t.tokenExp > Date.now()) { token = t.token; tokenExp = t.tokenExp; } } catch {}
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('無法載入 ' + src)); document.head.appendChild(s); });
+}
+async function initAuth() {
+  if (!window.google?.accounts?.oauth2) await loadScript('https://accounts.google.com/gsi/client');
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: clientId(), scope: SCOPE,
+    callback: r => {
+      const ws = tokenWaiters.splice(0);
+      if (r.error) return ws.forEach(w => w.rej(new Error(r.error)));
+      token = r.access_token; tokenExp = Date.now() + (Number(r.expires_in || 3600) - 120) * 1000;
+      try { localStorage.setItem('nn_tok', JSON.stringify({token, tokenExp})); localStorage.setItem('nn_consented', '1'); } catch {}
+      ws.forEach(w => w.res(token));
+    },
+    error_callback: e => tokenWaiters.splice(0).forEach(w => w.rej(new Error(e && e.type || '登入視窗被關閉'))),
+  });
+}
+function requestToken() {
+  return new Promise((res, rej) => {
+    tokenWaiters.push({res, rej});
+    tokenClient.requestAccessToken({prompt: localStorage.getItem('nn_consented') ? '' : 'consent'});
+  });
+}
+
+/* ---------------- Google 雲端硬碟 API ---------------- */
+const API = 'https://www.googleapis.com/drive/v3/files';
+const UP = 'https://www.googleapis.com/upload/drive/v3/files';
+const FIELDS = 'id,name,mimeType,parents,appProperties,modifiedTime,trashed';
+async function gfetch(url, opts = {}, tries = 0) {
+  if (!token || Date.now() > tokenExp) throw new AuthError('expired');
+  let r;
+  try { r = await fetch(url, {...opts, headers: {...(opts.headers || {}), Authorization: 'Bearer ' + token}}); }
+  catch (e) { if (tries < 3) { await sleep(800 * 2 ** tries); return gfetch(url, opts, tries + 1); } throw new Error('網路連線失敗'); }
+  if (r.status === 401) { token = null; localStorage.removeItem('nn_tok'); throw new AuthError('401'); }
+  if ((r.status === 429 || r.status >= 500 || r.status === 403) && tries < 3) {
+    if (r.status !== 403 || /rate|quota/i.test(await r.clone().text())) { await sleep(1000 * 2 ** tries); return gfetch(url, opts, tries + 1); }
+  }
+  if (!r.ok) throw new Error(`雲端硬碟錯誤 ${r.status}：${(await r.text()).slice(0, 160)}`);
+  return r;
+}
+const realDrive = {
+  async list() {
+    const out = []; let pageToken = '';
+    do {
+      const u = new URL(API);
+      u.searchParams.set('q', 'trashed=false');
+      u.searchParams.set('fields', `nextPageToken,files(${FIELDS})`);
+      u.searchParams.set('pageSize', '1000');
+      if (pageToken) u.searchParams.set('pageToken', pageToken);
+      const j = await (await gfetch(u)).json();
+      out.push(...j.files); pageToken = j.nextPageToken;
+    } while (pageToken);
+    return out;
+  },
+  async getText(id) { return (await gfetch(`${API}/${id}?alt=media`)).text(); },
+  async getMeta(id) { return (await gfetch(`${API}/${id}?fields=${FIELDS}`)).json(); },
+  async create(meta, text) {
+    if (text == null) return (await gfetch(`${API}?fields=${FIELDS}`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(meta)})).json();
+    const b = 'nnb' + Math.random().toString(36).slice(2) + Date.now();
+    const body = `--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${b}\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n${text}\r\n--${b}--`;
+    return (await gfetch(`${UP}?uploadType=multipart&fields=${FIELDS}`, {method: 'POST', headers: {'Content-Type': 'multipart/related; boundary=' + b}, body})).json();
+  },
+  async updateText(id, text) {
+    return (await gfetch(`${UP}/${id}?uploadType=media&fields=${FIELDS}`, {method: 'PATCH', headers: {'Content-Type': 'text/plain; charset=UTF-8'}, body: text})).json();
+  },
+  async patch(id, meta, addParent, removeParent) {
+    let u = `${API}/${id}?fields=${FIELDS}`;
+    if (addParent) u += `&addParents=${addParent}&removeParents=${removeParent}`;
+    return (await gfetch(u, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(meta)})).json();
+  },
+};
+
+/* ---------------- 示範版的假雲端 ---------------- */
+function makeMockDrive() {
+  let n = 0; const files = new Map();
+  const now = () => new Date(Date.now() + n).toISOString();
+  const add = (meta, text) => {
+    const id = 'm' + (++n);
+    files.set(id, {id, name: meta.name, mimeType: meta.mimeType || 'text/plain', parents: meta.parents || [], appProperties: {...(meta.appProperties || {})}, modifiedTime: now(), trashed: false, _t: text ?? ''});
+    return files.get(id);
+  };
+  const pub = f => { const {_t, ...r} = f; return JSON.parse(JSON.stringify(r)); };
+  const isTrashed = f => { while (f) { if (f.trashed) return true; f = files.get(f.parents[0]); } return false; };
+  const root = add({name: '小說筆記本', mimeType: FOLDER_MIME, appProperties: {nn: 'root'}});
+  let o = 0;
+  const F = (name, parent) => add({name, mimeType: FOLDER_MIME, parents: [parent.id], appProperties: {nn: 'folder', order: String(o++)}});
+  const D = (name, parent, t) => add({name: name + '.txt', parents: [parent.id], appProperties: {nn: 'doc', order: String(o++)}}, t);
+  const b1 = F('霧港紀事', root);
+  D('第一章　霧中燈塔', b1, '港口的霧總在黃昏時升起。\n\n艾琳站在碼頭盡頭，望著那座早已熄滅的燈塔。父親說過，只要燈塔還在，船就找得到回家的路。可是燈已經滅了七年，回來的船一年比一年少。\n\n「你又在看它了。」身後傳來老魯的聲音。他提著一盞油燈，燈罩上全是裂痕。\n\n「總得有人看著。」艾琳說。\n\n霧越來越濃，連腳下的木板都看不清了。就在這時，燈塔頂端閃了一下——很微弱，像有人在裡面點了一根火柴。');
+  D('第二章　舊碼頭', b1, '第二天一早，艾琳帶著繩子和一把生鏽的鑰匙去了舊碼頭。\n\n舊碼頭是港口最早建成的地方，石階被海水磨得發亮。她記得小時候常在這裡等父親的船，手裡握著一顆從燈塔窗台撿來的玻璃珠。\n\n「昨晚你也看到了吧？」老魯從倉庫後面走出來，「燈塔亮了。」');
+  D('第三章　鐘聲', b1, '燈塔裡沒有人。\n\n螺旋梯一共一百二十八階，艾琳一階一階數上去。最上層的玻璃罩積滿灰塵，只有一小塊被擦得乾乾淨淨，像是有人從裡面往外看過。\n\n遠處傳來鐘聲。港口已經十年沒有敲鐘了。');
+  const s1 = F('設定', b1);
+  D('角色設定', s1, '艾琳：十九歲，燈塔守之女。固執，記性極好，會數所有東西的數量。\n\n老魯：退休水手，左手少了兩根手指。知道燈塔熄滅那晚的真相，但從不提起。');
+  D('世界觀', s1, '霧港：位於大陸西岸的小港，每年秋冬有長達四個月的濃霧季。\n\n燈塔：港口唯一的導航設施，由守燈人世代看管。燈塔熄滅後，港口開始衰落。');
+  D('大綱', b1, '第一部：燈塔再次亮起（第一章～第十章）\n第二部：鐘聲與失蹤的船（第十一章～第二十章）\n結局：艾琳成為新的守燈人。');
+  const w1 = F('外傳', b1);
+  D('外傳一　守燈人的最後一夜', w1, '那是燈塔熄滅前的最後一夜。艾琳的父親在日誌上寫下：「霧裡有船，但船上沒有燈。」');
+  const b2 = F('星砂之歌', root);
+  D('第一章　沙漠的歌', b2, '在星砂沙漠，夜裡的沙子會唱歌。\n\n商隊的孩子們都知道，聽見歌聲時要閉上眼睛，否則會被帶到沙丘的另一邊。');
+  D('第二章　商隊', b2, '駱駝鈴響了三聲，商隊停下來。領隊說前面的綠洲乾了。');
+  D('大綱', b2, '主角：沙漠商隊的少年。目標：找到會唱歌的星砂的源頭。');
+  const b3 = F('白鷺書簡', root);
+  D('第一封信', b3, '親愛的阿青：\n\n今年的白鷺來得特別早，田裡一片白。我想起你說過，等白鷺來的時候你就回來。');
+  const wait = () => sleep(60);
+  return {
+    async list() { await wait(); return [...files.values()].filter(f => !isTrashed(f)).map(pub); },
+    async getText(id) { await wait(); return files.get(id)._t; },
+    async getMeta(id) { return pub(files.get(id)); },
+    async create(meta, text) { await wait(); return pub(add(meta, text)); },
+    async updateText(id, text) { await wait(); const f = files.get(id); f._t = text; f.modifiedTime = now(); n++; return pub(f); },
+    async patch(id, meta, addParent) {
+      await wait(); const f = files.get(id);
+      if (meta.name != null) f.name = meta.name;
+      if (meta.trashed != null) f.trashed = meta.trashed;
+      if (meta.appProperties) Object.assign(f.appProperties, meta.appProperties);
+      if (addParent) f.parents = [addParent];
+      return pub(f);
+    },
+  };
+}
+const drive = DEMO ? makeMockDrive() : realDrive;
+if (DEMO) { token = 'demo'; tokenExp = Infinity; }
+
+/* ---------------- 狀態 ---------------- */
+const S = {
+  nodes: new Map(), rootId: null,
+  currentId: null, view: 'node', mode: 'edit',
+  hl: null, hlIndex: 0,
+  dirty: new Set(), saving: false, again: false,
+  expanded: new Set(JSON.parse(localStorage.getItem(DEMO ? 'nn_exp_demo' : 'nn_exp') || '[]')),
+  lastSync: 0,
+};
+const saveExpanded = () => localStorage.setItem(DEMO ? 'nn_exp_demo' : 'nn_exp', JSON.stringify([...S.expanded]));
+const node = id => S.nodes.get(id);
+const dispName = n => n.type === 'doc' ? n.name.replace(/\.txt$/i, '') : n.name;
+function setText(n, t) { n.text = t; n.wc = countWords(t); }
+function wordsOf(id) { const n = node(id); if (!n) return 0; return n.type === 'doc' ? (n.wc || 0) : n.children.reduce((s, c) => s + wordsOf(c), 0); }
+function docsUnder(id) { const n = node(id); if (!n) return []; return n.type === 'doc' ? [n] : n.children.flatMap(docsUnder); }
+function ancestors(id) { const out = []; let n = node(id); while (n && n.parentId && n.parentId !== S.rootId) { n = node(n.parentId); if (!n) break; out.unshift(n); } return out; }
+function bookOf(id) { const a = ancestors(id); return a[0] || node(id); }
+function isUnder(id, ancestorId) { let n = node(id); while (n) { if (n.id === ancestorId) return true; n = node(n.parentId); } return false; }
+
+/* ---------------- 載入 / 同步 ---------------- */
+async function loadAll(progress) {
+  const files = await drive.list();
+  let root = files.find(f => f.appProperties && f.appProperties.nn === 'root');
+  if (!root) { root = await drive.create({name: '小說筆記本', mimeType: FOLDER_MIME, appProperties: {nn: 'root'}}); }
+  S.rootId = root.id;
+  const old = S.nodes, nodes = new Map();
+  nodes.set(root.id, {id: root.id, type: 'folder', name: root.name, parentId: null, order: 0, children: []});
+  for (const f of files) {
+    const nn = f.appProperties && f.appProperties.nn;
+    if (nn !== 'folder' && nn !== 'doc') continue;
+    const o = old.get(f.id);
+    nodes.set(f.id, {
+      id: f.id, type: nn, name: f.name, parentId: (f.parents || [])[0],
+      order: Number(f.appProperties.order || 0), modifiedTime: f.modifiedTime, children: [],
+      text: o ? o.text : null, wc: o ? o.wc : 0, loadedTime: o ? o.loadedTime : null, base: o ? o.base : f.modifiedTime,
+    });
+  }
+  // 本機還沒存上去、但雲端清單裡沒有的（例如別台裝置刪掉了）→ 保留，存檔時會救回
+  for (const id of S.dirty) if (!nodes.has(id) && old.has(id)) nodes.set(id, {...old.get(id), children: [], resurrect: true});
+  for (const n of nodes.values()) {
+    if (n.id === S.rootId) continue;
+    const p = nodes.get(n.parentId);
+    if (p && p.type === 'folder') p.children.push(n.id);
+  }
+  const cmp = (a, b) => { const A = nodes.get(a), B = nodes.get(b); return A.order - B.order || A.name.localeCompare(B.name, 'zh-Hant', {numeric: true}); };
+  for (const n of nodes.values()) n.children.sort(cmp);
+  S.nodes = nodes;
+
+  const need = [];
+  for (const n of nodes.values()) {
+    if (n.type !== 'doc' || S.dirty.has(n.id)) continue;
+    if (n.text != null && n.loadedTime === n.modifiedTime) continue;
+    const c = await idb.get('cache', n.id);
+    if (c && c.modifiedTime === n.modifiedTime) { setText(n, c.text); n.loadedTime = n.base = n.modifiedTime; continue; }
+    need.push(n);
+  }
+  let done = 0;
+  if (need.length && progress) progress(0, need.length);
+  await pool(need, 6, async n => {
+    const t = await drive.getText(n.id);
+    if (!S.dirty.has(n.id)) { setText(n, t); n.loadedTime = n.base = n.modifiedTime; idb.set('cache', n.id, {modifiedTime: n.modifiedTime, text: t}); }
+    done++; if (progress) progress(done, need.length);
+  });
+  S.lastSync = Date.now();
+}
+async function restoreDrafts() {
+  for (const id of await idb.keys('drafts')) {
+    const d = await idb.get('drafts', id), n = node(id);
+    if (!d || !n) { idb.del('drafts', id); continue; }
+    if (d.text === n.text) { idb.del('drafts', id); continue; }
+    setText(n, d.text); n.base = d.base; S.dirty.add(id);
+  }
+  if (S.dirty.size) { setStatus('有未上傳的內容，正在存檔…'); scheduleSave(300); }
+}
+let syncing = false;
+async function sync(force) {
+  if (syncing || (!force && Date.now() - S.lastSync < 20000)) return;
+  syncing = true;
+  try {
+    const cur = S.currentId && node(S.currentId), before = cur && cur.text;
+    await loadAll();
+    renderTree(); renderScope();
+    const now = S.currentId && node(S.currentId);
+    if (!now) { S.currentId = null; renderMain(); }
+    else if (now.type === 'doc' && now.text !== before && !S.dirty.has(now.id)) refreshDocText(now);
+    else if (now.type === 'folder' && S.view === 'node') renderMain();
+    if (S.view === 'search') runSearch();
+    if (!S.dirty.size) setStatus('已同步');
+  } catch (e) { handleErr(e); }
+  finally { syncing = false; }
+}
+
+/* ---------------- 存檔 ---------------- */
+let saveTimer = null, draftTimer = null;
+function scheduleSave(ms = 1500) { clearTimeout(saveTimer); saveTimer = setTimeout(flush, ms); }
+function markDirty(id, text) {
+  const n = node(id);
+  if (!S.dirty.has(id)) n.base = n.modifiedTime;
+  setText(n, text); S.dirty.add(id);
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(() => idb.set('drafts', id, {text: n.text, base: n.base}), 300);
+  setStatus('編輯中…');
+  scheduleSave();
+}
+async function flush() {
+  if (S.saving) { S.again = true; return; }
+  if (!S.dirty.size) return;
+  S.saving = true; setStatus('儲存中…');
+  try {
+    for (const id of [...S.dirty]) {
+      const n = node(id);
+      if (!n) { S.dirty.delete(id); continue; }
+      const text = n.text;
+      let meta = await drive.getMeta(id);
+      if (meta.trashed || n.resurrect) { meta = await drive.patch(id, {trashed: false}); n.resurrect = false; toast(`「${dispName(n)}」在別的地方被刪除了，已幫你救回來`); }
+      if (meta.modifiedTime !== n.base) {
+        const choice = await conflictDialog(n);
+        if (choice === 'theirs') {
+          const p = node(n.parentId);
+          const stamp = new Date().toLocaleString('zh-TW', {hour12: false});
+          await createDoc(p ? p.id : S.rootId, `${dispName(n)}（這台裝置的版本 ${stamp}）`, text, true);
+          const remote = await drive.getText(id);
+          setText(n, remote); n.modifiedTime = n.base = n.loadedTime = meta.modifiedTime;
+          S.dirty.delete(id); idb.del('drafts', id); idb.set('cache', id, {modifiedTime: meta.modifiedTime, text: remote});
+          if (S.currentId === id) refreshDocText(n);
+          continue;
+        }
+      }
+      const res = await drive.updateText(id, text);
+      n.modifiedTime = n.base = n.loadedTime = res.modifiedTime;
+      idb.set('cache', id, {modifiedTime: res.modifiedTime, text});
+      if (n.text === text) { S.dirty.delete(id); idb.del('drafts', id); }
+    }
+    const t = new Date().toLocaleTimeString('zh-TW', {hour: '2-digit', minute: '2-digit', hour12: false});
+    setStatus(S.dirty.size ? '編輯中…' : `已存到雲端 ${t}`);
+  } catch (e) {
+    if (e instanceof AuthError) showAuthBar();
+    else { setStatus('存檔失敗，稍後重試（內容已暫存在本機）', true); scheduleSave(15000); }
+  } finally {
+    S.saving = false;
+    if (S.again) { S.again = false; scheduleSave(200); }
+  }
+}
+
+/* ---------------- 建立 / 修改 ---------------- */
+function nextOrder(parentId) { const p = node(parentId); return p.children.reduce((m, c) => Math.max(m, node(c).order), -1) + 1; }
+function addNode(f, type, text) {
+  const n = {id: f.id, type, name: f.name, parentId: f.parents[0], order: Number(f.appProperties.order), modifiedTime: f.modifiedTime, base: f.modifiedTime, loadedTime: f.modifiedTime, children: [], text: null, wc: 0};
+  if (type === 'doc') { setText(n, text || ''); idb.set('cache', n.id, {modifiedTime: n.modifiedTime, text: n.text}); }
+  S.nodes.set(n.id, n); node(n.parentId).children.push(n.id);
+  return n;
+}
+async function createFolder(parentId, name) {
+  const f = await drive.create({name, mimeType: FOLDER_MIME, parents: [parentId], appProperties: {nn: 'folder', order: String(nextOrder(parentId))}});
+  return addNode(f, 'folder');
+}
+async function createDoc(parentId, name, text = '', silent) {
+  const f = await drive.create({name: name + '.txt', mimeType: 'text/plain', parents: [parentId], appProperties: {nn: 'doc', order: String(nextOrder(parentId))}}, text);
+  const n = addNode(f, 'doc', text);
+  if (!silent) { S.expanded.add(parentId); saveExpanded(); }
+  renderTree();
+  return n;
+}
+async function renameNode(id, name) {
+  const n = node(id); name = name.trim(); if (!name || name === dispName(n)) return;
+  const full = n.type === 'doc' ? name + '.txt' : name;
+  await drive.patch(id, {name: full}); n.name = full;
+  renderTree(); renderScope();
+  if (S.currentId === id || (S.currentId && isUnder(S.currentId, id))) updateCrumb();
+}
+async function moveSibling(id, dir) {
+  const n = node(id), p = node(n.parentId), arr = p.children.slice(), i = arr.indexOf(id), j = i + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  p.children = arr; renderTree();
+  await Promise.all(arr.map((cid, k) => { const c = node(cid); if (c.order === k) return null; c.order = k; return drive.patch(cid, {appProperties: {order: String(k)}}); }));
+  if (S.currentId === p.id && S.view === 'node') renderMain();
+}
+async function moveTo(id, newParentId) {
+  const n = node(id), oldP = node(n.parentId);
+  if (newParentId === n.parentId) return;
+  const order = nextOrder(newParentId);
+  await drive.patch(id, {appProperties: {order: String(order)}}, newParentId, n.parentId);
+  oldP.children = oldP.children.filter(c => c !== id);
+  n.parentId = newParentId; n.order = order; node(newParentId).children.push(id);
+  S.expanded.add(newParentId); saveExpanded();
+  renderTree(); renderScope(); if (S.view === 'node') renderMain();
+}
+async function trashNode(id) {
+  const n = node(id), p = node(n.parentId);
+  await drive.patch(id, {trashed: true});
+  p.children = p.children.filter(c => c !== id);
+  for (const d of docsUnder(id)) { S.dirty.delete(d.id); idb.del('drafts', d.id); }
+  const removeRec = x => { const nn = node(x); if (!nn) return; nn.children.forEach(removeRec); S.nodes.delete(x); };
+  const curGone = S.currentId && isUnder(S.currentId, id);
+  removeRec(id);
+  if (curGone) { S.currentId = p.id === S.rootId ? null : p.id; }
+  renderTree(); renderScope(); renderMain();
+}
+function downloadTxt(id) {
+  const n = node(id);
+  let out;
+  if (n.type === 'doc') out = n.text || '';
+  else {
+    const parts = [];
+    const walk = (x, depth) => {
+      const c = node(x);
+      if (c.type === 'doc') parts.push(`【${dispName(c)}】\n\n${c.text || ''}\n`);
+      else { if (depth > 0) parts.push(`\n======== ${c.name} ========\n`); c.children.forEach(k => walk(k, depth + 1)); }
+    };
+    walk(id, 0); out = `${dispName(n)}\n\n` + parts.join('\n');
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([out], {type: 'text/plain;charset=utf-8'}));
+  a.download = (id === S.rootId ? '小說筆記本全部備份' : dispName(n)) + '.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+async function readFileText(file) {
+  if (/\.docx$/i.test(file.name)) {
+    if (!window.mammoth) await loadScript(MAMMOTH);
+    const r = await mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()});
+    return r.value.replace(/\n{3,}/g, '\n\n').trim();
+  }
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', {fatal: true}).decode(buf).replace(/^﻿/, ''); }
+  catch { return new TextDecoder('big5').decode(buf); }
+}
+let importTarget = null;
+async function importFiles(files) {
+  const list = sortFilesByChapter([...files]);
+  let i = 0;
+  for (const f of list) {
+    i++; setStatus(`匯入中 ${i}/${list.length}…`);
+    const text = await readFileText(f);
+    await createDoc(importTarget, f.name.replace(/\.(txt|md|docx)$/i, ''), text);
+  }
+  setStatus(`匯入完成，共 ${list.length} 個檔案`);
+  toast(`已匯入 ${list.length} 個檔案`);
+  openNode(importTarget);
+}
+
+/* ---------------- 畫面：左側目錄 ---------------- */
+function rowHtml(id, depth) {
+  const n = node(id), isF = n.type === 'folder', open = S.expanded.has(id);
+  let h = `<div class="row ${isF ? 'folder' : 'doc'} d${Math.min(depth, 3)}${S.currentId === id && S.view === 'node' ? ' active' : ''}" data-id="${id}" style="--d:${depth}">`
+    + `<button class="tw" data-act="toggle">${isF ? (open ? '▾' : '▸') : ''}</button>`
+    + `<span class="nm">${esc(dispName(n))}</span><span class="wc" data-wc="${id}">${fmt(wordsOf(id))}</span>`
+    + `<button class="more" data-act="menu" aria-label="更多">⋯</button></div>`;
+  if (isF && open) {
+    h += n.children.map(c => rowHtml(c, depth + 1)).join('');
+    if (!n.children.length) h += `<div class="row hint" style="--d:${depth}">還是空的，按 ⋯ 新增</div>`;
+  }
+  return h;
+}
+function renderTree() {
+  const root = node(S.rootId);
+  $('#tree').innerHTML = root.children.length ? root.children.map(c => rowHtml(c, 0)).join('')
+    : `<div class="empty">還沒有任何作品<br>按右上角「＋ 新書」開始</div>`;
+  $('#totalWc').textContent = fmt(wordsOf(S.rootId));
+}
+function updateCounts() {
+  document.querySelectorAll('[data-wc]').forEach(el => { el.textContent = fmt(wordsOf(el.dataset.wc)); });
+  $('#totalWc').textContent = fmt(wordsOf(S.rootId));
+  const n = S.currentId && node(S.currentId);
+  if (n && n.type === 'doc') {
+    const a = $('#wcDoc'), b = $('#wcBook');
+    if (a) a.textContent = fmt(n.wc); if (b) b.textContent = fmt(wordsOf(bookOf(n.id).id));
+  }
+}
+function renderScope() {
+  const sel = $('#scope'), v = sel.value;
+  const books = node(S.rootId).children.map(node);
+  sel.innerHTML = `<option value="all">在全部作品裡搜尋</option>` + books.map(b => `<option value="${b.id}">只搜尋《${esc(b.name)}》</option>`).join('');
+  sel.value = books.some(b => b.id === v) ? v : 'all';
+}
+function setStatus(t, warn) {
+  const s = $('#status'); if (s) { s.textContent = t; s.style.color = warn ? '#b3261e' : ''; }
+  const d = $('.savest'); if (d) { d.textContent = t; d.classList.toggle('warn', !!warn); }
+}
+
+/* ---------------- 畫面：右側內容 ---------------- */
+function crumbHtml(id) {
+  const parts = ancestors(id).map(a => `<a data-open="${a.id}">${esc(a.name)}</a>`);
+  return parts.join(' › ') || '';
+}
+function updateCrumb() { const c = $('.topbar .crumb'); if (c && S.currentId) c.innerHTML = crumbHtml(S.currentId); }
+function openNode(id, opts = {}) {
+  const n = node(id); if (!n) return;
+  if (S.currentId && S.currentId !== id && S.dirty.size) flush();
+  S.currentId = id; S.view = 'node';
+  S.mode = opts.mode || (n.type === 'doc' && S.hl && opts.keepHl ? 'read' : 'edit');
+  if (!opts.keepHl) S.hl = null;
+  for (const a of ancestors(id)) S.expanded.add(a.id);
+  if (n.type === 'folder') S.expanded.add(id);
+  saveExpanded();
+  localStorage.setItem(DEMO ? 'nn_last_demo' : 'nn_last', id);
+  document.body.classList.add('show-main');
+  renderTree(); renderMain(opts);
+}
+function renderMain(opts = {}) {
+  const m = $('#main');
+  if (S.view === 'search') return renderSearch();
+  const n = S.currentId && node(S.currentId);
+  if (!n) {
+    m.innerHTML = `<div class="topbar"><button class="back" data-act="back">‹ 目錄</button><div class="crumb"></div></div>
+      <div class="empty" style="margin-top:12vh"><div style="font-family:var(--serif);font-size:22px;color:var(--ink);margin-bottom:6px">小說筆記本</div>從左邊選一本書或一個章節開始寫。<br>全部作品共 ${fmt(wordsOf(S.rootId))} 字。</div>`;
+    return;
+  }
+  if (n.type === 'folder') renderFolder(n); else renderDoc(n, opts);
+}
+function renderFolder(n) {
+  const kids = n.children.map(node);
+  const docs = docsUnder(n.id), folders = [...S.nodes.values()].filter(x => x.type === 'folder' && x.id !== n.id && isUnder(x.id, n.id));
+  const max = Math.max(1, ...kids.map(k => wordsOf(k.id)));
+  $('#main').innerHTML = `
+  <div class="topbar"><button class="back" data-act="back">‹ 目錄</button><div class="crumb">${crumbHtml(n.id)}</div><span class="savest"></span></div>
+  <div class="page">
+    <h2 class="ptitle" data-act="rename" data-id="${n.id}" title="點一下改名">${esc(n.name)}</h2>
+    <div class="stats">
+      <div class="stat"><b>${fmt(wordsOf(n.id))}</b><span>總字數</span></div>
+      <div class="stat"><b>${docs.length}</b><span>篇文件</span></div>
+      ${folders.length ? `<div class="stat"><b>${folders.length}</b><span>個資料夾</span></div>` : ''}
+    </div>
+    <div class="actions">
+      <button class="btn primary" data-act="newdoc" data-id="${n.id}">＋ 新增章節</button>
+      <button class="btn" data-act="newfolder" data-id="${n.id}">＋ 新增資料夾</button>
+      <button class="btn" data-act="import" data-id="${n.id}">匯入檔案</button>
+      <button class="btn" data-act="download" data-id="${n.id}">下載成 txt</button>
+    </div>
+    ${kids.length ? `<div class="list">${kids.map(k => `
+      <div class="li" data-open="${k.id}"><span class="ic">${k.type === 'folder' ? '▸' : '·'}</span>
+      <span class="nm"${k.type === 'folder' ? ' style="font-weight:600"' : ''}>${esc(dispName(k))}</span>
+      <span class="bar"><i style="width:${Math.round(wordsOf(k.id) / max * 100)}%"></i></span>
+      <span class="wc">${fmt(wordsOf(k.id))} 字</span></div>`).join('')}</div>`
+      : `<div class="empty">這裡還是空的。<br>可以新增章節、建立「設定」「外傳」之類的資料夾，或直接匯入現有的 txt / Word 檔。</div>`}
+  </div>`;
+  setStatus($('#status').textContent);
+}
+function hlRegex(kws) { return new RegExp(kws.slice().sort((a, b) => b.length - a.length).map(escRe).join('|'), 'gi'); }
+function highlightHtml(text, kws, withPos) {
+  const re = hlRegex(kws), map = new Map(kws.map((k, i) => [k.toLowerCase(), i % 5]));
+  let out = '', last = 0, m;
+  while ((m = re.exec(text))) {
+    if (!m[0]) { re.lastIndex++; continue; }
+    out += esc(text.slice(last, m.index));
+    out += `<mark class="k${map.get(m[0].toLowerCase()) ?? 0}"${withPos ? ` data-pos="${m.index}" data-len="${m[0].length}"` : ''}>${esc(m[0])}</mark>`;
+    last = m.index + m[0].length;
+  }
+  return out + esc(text.slice(last));
+}
+function renderDoc(n, opts = {}) {
+  const book = bookOf(n.id);
+  const read = S.mode === 'read';
+  $('#main').innerHTML = `
+  <div class="topbar"><button class="back" data-act="back">‹ 目錄</button><div class="crumb">${crumbHtml(n.id)}</div>
+    <span class="savest"></span>
+    <div class="seg"><button data-act="mode" data-m="edit" class="${read ? '' : 'on'}">編輯</button><button data-act="mode" data-m="read" class="${read ? 'on' : ''}">閱讀</button></div>
+  </div>
+  ${S.hl ? `<div class="findbar">${S.hl.map((k, i) => `<span class="chip k${i % 5}">${esc(k)}</span>`).join('')}
+    <span class="n" id="hlN"></span>
+    <button class="btn" data-act="hlprev">▲ 上一個</button><button class="btn" data-act="hlnext">▼ 下一個</button>
+    <button class="linkbtn" data-act="hlclear">清除標示</button></div>` : ''}
+  <div class="sheet">
+    <input class="dtitle" id="dtitle" value="${esc(dispName(n))}" aria-label="章節名稱">
+    <div class="dcount">本章 <b id="wcDoc">${fmt(n.wc)}</b> 字　・　${book.id === n.id ? '' : `《${esc(book.name)}》全書 <b id="wcBook">${fmt(wordsOf(book.id))}</b> 字`}</div>
+    ${read
+      ? `<div class="text read" id="reader">${S.hl ? highlightHtml(n.text || '', S.hl, true) : esc(n.text || '')}</div>`
+      : `<div class="grow" id="grow"><textarea id="ed" class="text" placeholder="開始寫吧……" spellcheck="false"></textarea></div>`}
+  </div>`;
+  setStatus($('#status').textContent);
+  const t = $('#dtitle');
+  t.addEventListener('change', () => run(() => renameNode(n.id, t.value)));
+  t.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); t.blur(); } });
+  if (!read) {
+    const ed = $('#ed'), grow = $('#grow');
+    ed.value = n.text || ''; grow.dataset.v = ed.value;
+    ed.addEventListener('input', () => { grow.dataset.v = ed.value; markDirty(n.id, ed.value); updateCounts(); });
+    if (opts.selectPos != null) {
+      requestAnimationFrame(() => {
+        ed.focus({preventScroll: true});
+        ed.setSelectionRange(opts.selectPos, opts.selectPos + (opts.selectLen || 0));
+        if (opts.scrollTop != null) $('#main').scrollTop = opts.scrollTop;
+      });
+    } else if (opts.focus) ed.focus();
+  } else if (S.hl) {
+    const marks = [...document.querySelectorAll('#reader mark')];
+    let idx = 0;
+    if (opts.pos != null) { const k = marks.findIndex(mk => +mk.dataset.pos >= opts.pos); idx = k < 0 ? 0 : k; }
+    S.hlIndex = idx; focusMark(true);
+  }
+}
+function focusMark(scroll) {
+  const marks = [...document.querySelectorAll('#reader mark')];
+  const n = $('#hlN');
+  if (!marks.length) { if (n) n.textContent = '這篇沒有符合的地方'; return; }
+  S.hlIndex = (S.hlIndex + marks.length) % marks.length;
+  marks.forEach((m, i) => m.classList.toggle('cur', i === S.hlIndex));
+  if (n) n.textContent = `${S.hlIndex + 1} / ${marks.length}`;
+  if (scroll) {
+    const main = $('#main'), mk = marks[S.hlIndex];
+    const y = mk.getBoundingClientRect().top - main.getBoundingClientRect().top + main.scrollTop - main.clientHeight / 3;
+    main.scrollTo({top: Math.max(0, y), behavior: 'smooth'});
+  }
+}
+function refreshDocText(n) {
+  if (S.view !== 'node' || S.currentId !== n.id) return;
+  const ed = $('#ed');
+  if (ed && document.activeElement !== ed) { ed.value = n.text || ''; $('#grow').dataset.v = ed.value; }
+  else if (!ed) renderMain();
+  updateCounts();
+}
+function switchMode(m) {
+  const n = node(S.currentId); if (!n || S.mode === m) return;
+  const main = $('#main'), st = main.scrollTop;
+  let sel = null;
+  if (m === 'edit') {
+    const cur = document.querySelector('#reader mark.cur');
+    if (cur) sel = {selectPos: +cur.dataset.pos, selectLen: +cur.dataset.len};
+  }
+  S.mode = m;
+  renderDoc(n, sel ? {...sel, scrollTop: st} : {});
+  if (!sel) main.scrollTop = st;
+}
+
+/* ---------------- 搜尋 ---------------- */
+let searchTimer = null;
+function keywords() { return [...new Set($('#q').value.trim().split(/\s+/).filter(Boolean))].slice(0, 10); }
+function runSearch() {
+  const kws = keywords();
+  if (!kws.length) { if (S.view === 'search') { S.view = 'node'; renderMain(); renderTree(); } return; }
+  S.view = 'search'; document.body.classList.add('show-main');
+  renderSearch(); renderTree();
+}
+function renderSearch() {
+  const kws = keywords(), scope = $('#scope').value;
+  const docs = scope === 'all' ? docsUnder(S.rootId) : docsUnder(scope);
+  const re = hlRegex(kws), map = new Map(kws.map((k, i) => [k.toLowerCase(), i % 5]));
+  const perKw = kws.map(() => 0);
+  const results = [];
+  for (const d of docs) {
+    const t = d.text || '', hits = []; let m; re.lastIndex = 0;
+    while ((m = re.exec(t))) { if (!m[0]) { re.lastIndex++; continue; } hits.push({pos: m.index, len: m[0].length}); perKw[kws.findIndex(k => k.toLowerCase() === m[0].toLowerCase())]++; }
+    const titleHit = kws.some(k => dispName(d).toLowerCase().includes(k.toLowerCase()));
+    if (hits.length || titleHit) results.push({d, hits, titleHit});
+  }
+  const total = perKw.reduce((a, b) => a + b, 0);
+  const SNIPS = 4;
+  const snipHtml = (d, hits) => {
+    const t = d.text || '', wins = [];
+    for (const h of hits) {
+      const s = Math.max(0, h.pos - 28), e = Math.min(t.length, h.pos + h.len + 48);
+      const last = wins[wins.length - 1];
+      if (last && s <= last.e) last.e = Math.max(last.e, e); else wins.push({s, e, pos: h.pos});
+    }
+    const shown = wins.slice(0, SNIPS);
+    return shown.map(w => {
+      const piece = t.slice(w.s, w.e);
+      const html = highlightHtml(piece, kws).replace(/\n+/g, '<span class="nl">↵</span>');
+      return `<div class="snip" data-hit="${d.id}" data-pos="${w.pos}">${w.s > 0 ? '…' : ''}${html}${w.e < t.length ? '…' : ''}</div>`;
+    }).join('') + (wins.length > SNIPS ? `<div class="more-n">還有 ${wins.length - SNIPS} 段，點標題看全文</div>` : '');
+  };
+  const scopeName = scope === 'all' ? '全部作品' : `《${esc(node(scope).name)}》`;
+  $('#main').innerHTML = `
+  <div class="topbar"><button class="back" data-act="back">‹ 目錄</button><div class="crumb">搜尋 ・ ${scopeName}</div><span class="savest"></span></div>
+  <div class="page">
+    <div class="sum">${kws.map((k, i) => `<span class="chip k${i % 5}">${esc(k)} ${perKw[i]}</span>`).join('')}
+      <span>共 ${total} 處，在 ${results.length} 篇文件裡</span></div>
+    ${results.length ? results.map(({d, hits, titleHit}) => `
+      <div class="res">
+        <div class="res-h" data-hit="${d.id}" data-pos="${hits[0] ? hits[0].pos : ''}">
+          <span class="nm">${highlightHtml(dispName(d), kws)}</span>
+          <span class="path">${esc([...ancestors(d.id)].map(a => a.name).join(' › '))}</span>
+          <span class="cnt">${hits.length ? hits.length + ' 處' : '標題符合'}</span>
+        </div>
+        ${snipHtml(d, hits)}
+      </div>`).join('') : `<div class="empty">在${scopeName}裡找不到「${esc(kws.join(' '))}」</div>`}
+  </div>`;
+  setStatus($('#status').textContent);
+}
+
+/* ---------------- 選單 / 對話框 / 提示 ---------------- */
+function showMenu(anchor, items) {
+  const m = $('#menu');
+  m.innerHTML = items.map((it, i) => it === '-' ? '<hr>' : `<button data-i="${i}" class="${it.danger ? 'danger' : ''}">${it.label}</button>`).join('');
+  m.classList.remove('hidden');
+  const r = anchor.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+  let x = Math.min(r.right - mw, innerWidth - mw - 8), y = r.bottom + 4;
+  if (y + mh > innerHeight - 8) y = Math.max(8, r.top - mh - 4);
+  m.style.left = Math.max(8, x) + 'px'; m.style.top = y + 'px';
+  m.onclick = e => { const b = e.target.closest('button[data-i]'); if (!b) return; hideMenu(); run(items[+b.dataset.i].fn); };
+}
+function hideMenu() { $('#menu').classList.add('hidden'); }
+function dialog({title, message = '', input, buttons, options}) {
+  return new Promise(res => {
+    const md = $('#modal');
+    md.innerHTML = `<div class="box"><h3>${esc(title)}</h3>${message ? `<p>${esc(message)}</p>` : ''}
+      ${input != null ? `<input id="dlgIn" value="${esc(input)}" autocomplete="off">` : ''}
+      ${options ? `<div class="opts">${options.map((o, i) => `<button class="opt" data-o="${i}" style="padding-left:${12 + (o.depth || 0) * 16}px">${esc(o.label)}</button>`).join('')}</div>` : ''}
+      <div class="btns">${buttons.map((b, i) => `<button class="btn ${b.primary ? 'primary' : ''} ${b.danger ? 'danger' : ''}" data-b="${i}">${esc(b.label)}</button>`).join('')}</div></div>`;
+    md.classList.remove('hidden');
+    const inp = $('#dlgIn');
+    const done = v => { md.classList.add('hidden'); md.innerHTML = ''; res(v); };
+    if (inp) { setTimeout(() => { inp.focus(); inp.select(); }, 30); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { const p = buttons.find(b => b.primary); done(p ? p.value === 'ok' ? inp.value : p.value : inp.value); } if (e.key === 'Escape') done(null); }); }
+    md.onclick = e => {
+      const o = e.target.closest('[data-o]'); if (o) return done(options[+o.dataset.o].value);
+      const b = e.target.closest('[data-b]'); if (b) { const v = buttons[+b.dataset.b].value; return done(v === 'ok' && inp ? inp.value : v); }
+      if (e.target === md) done(null);
+    };
+  });
+}
+const ask = (title, def = '', message) => dialog({title, message, input: def, buttons: [{label: '取消', value: null}, {label: '確定', value: 'ok', primary: true}]});
+const confirmDlg = (title, message, okLabel = '確定', danger) => dialog({title, message, buttons: [{label: '取消', value: false}, {label: okLabel, value: true, primary: !danger, danger}]});
+function conflictDialog(n) {
+  return dialog({
+    title: `「${dispName(n)}」在另一台裝置上也被改過`,
+    message: '兩邊的內容不一樣了，要怎麼處理？\n選「保留兩份」不會弄丟任何文字：雲端的版本留在原處，這台的版本另存成一篇新的。',
+    buttons: [{label: '保留兩份', value: 'theirs', primary: true}, {label: '用這台的覆蓋', value: 'mine'}],
+  }).then(v => v || 'theirs');
+}
+let toastTimer;
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.remove('hidden'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.add('hidden'), 3200); }
+function showAuthBar() { $('#authbar').classList.remove('hidden'); setStatus('需要重新連線', true); }
+function handleErr(e) { console.error(e); if (e instanceof AuthError) showAuthBar(); else toast(e.message || String(e)); }
+async function run(fn) { try { await fn(); } catch (e) { handleErr(e); } }
+
+function nodeMenu(id) {
+  const n = node(id), isF = n.type === 'folder', p = node(n.parentId), i = p.children.indexOf(id);
+  const items = [];
+  if (isF) items.push(
+    {label: '＋ 新增章節', fn: () => actNewDoc(id)},
+    {label: '＋ 新增資料夾', fn: () => actNewFolder(id)},
+    {label: '匯入 txt / Word 檔', fn: () => actImport(id)}, '-');
+  items.push({label: '重新命名', fn: () => actRename(id)});
+  if (i > 0) items.push({label: '上移', fn: () => moveSibling(id, -1)});
+  if (i < p.children.length - 1) items.push({label: '下移', fn: () => moveSibling(id, 1)});
+  items.push({label: '移到…', fn: () => actMove(id)}, {label: '下載成 txt', fn: () => downloadTxt(id)}, '-',
+    {label: '刪除', danger: true, fn: () => actDelete(id)});
+  return items;
+}
+async function actNewDoc(pid) {
+  const name = await ask('新增章節', suggestChapterName(pid)); if (!name || !name.trim()) return;
+  const n = await createDoc(pid, name.trim()); openNode(n.id, {focus: true});
+  setTimeout(() => { const ed = $('#ed'); if (ed) ed.focus(); }, 50);
+}
+async function actNewFolder(pid) {
+  const name = await ask('新增資料夾', '', '例如：第一卷、設定、外傳、大綱'); if (!name || !name.trim()) return;
+  const f = await createFolder(pid, name.trim()); S.expanded.add(pid); saveExpanded(); renderTree();
+  if (S.currentId === pid && S.view === 'node') renderMain(); else openNode(f.id);
+}
+async function actNewBook() {
+  const name = await ask('新增一本書', '', '輸入書名'); if (!name || !name.trim()) return;
+  const b = await createFolder(S.rootId, name.trim()); renderTree(); renderScope(); openNode(b.id);
+}
+async function actRename(id) { const n = node(id); const name = await ask('重新命名', dispName(n)); if (name) await renameNode(id, name); if (S.currentId === id) renderMain(); }
+function actImport(id) { importTarget = id; const fi = $('#fileIn'); fi.value = ''; fi.click(); }
+async function actMove(id) {
+  const n = node(id), opts = [];
+  if (n.type === 'folder') opts.push({label: '最上層（變成一本獨立的書）', value: S.rootId, depth: 0});
+  const walk = (fid, depth) => { for (const c of node(fid).children) { const x = node(c); if (x.type !== 'folder' || x.id === id) continue; opts.push({label: (depth ? '' : '《') + x.name + (depth ? '' : '》'), value: x.id, depth}); walk(x.id, depth + 1); } };
+  walk(S.rootId, 0);
+  const to = await dialog({title: `把「${dispName(n)}」移到…`, options: opts.filter(o => o.value !== n.parentId), buttons: [{label: '取消', value: null}]});
+  if (to) await moveTo(id, to);
+}
+async function actDelete(id) {
+  const n = node(id), cnt = docsUnder(id).length;
+  const ok = await confirmDlg(`刪除「${dispName(n)}」？`,
+    (n.type === 'folder' ? `裡面的 ${cnt} 篇文件也會一起刪除。\n` : '') + '會移到 Google 雲端硬碟的垃圾桶，30 天內都可以從雲端硬碟救回來。', '刪除', true);
+  if (ok) await trashNode(id);
+}
+
+/* ---------------- 事件 ---------------- */
+document.addEventListener('click', e => {
+  if (!e.target.closest('#menu') && !e.target.closest('[data-act="menu"]') && !e.target.closest('[data-act="sysmenu"]')) hideMenu();
+  const actEl = e.target.closest('[data-act]');
+  const row = e.target.closest('#tree .row[data-id]');
+  if (actEl) {
+    const act = actEl.dataset.act, id = actEl.dataset.id || (row && row.dataset.id);
+    if (act === 'toggle') { const n = node(id); if (n.type === 'folder') { S.expanded.has(id) ? S.expanded.delete(id) : S.expanded.add(id); saveExpanded(); renderTree(); } else openNode(id); return; }
+    if (act === 'menu') { e.stopPropagation(); showMenu(actEl, nodeMenu(id)); return; }
+    if (act === 'newbook') return run(actNewBook);
+    if (act === 'newdoc') return run(() => actNewDoc(id));
+    if (act === 'newfolder') return run(() => actNewFolder(id));
+    if (act === 'import') return actImport(id);
+    if (act === 'download') return downloadTxt(id);
+    if (act === 'rename') return run(() => actRename(id));
+    if (act === 'back') { document.body.classList.remove('show-main'); return; }
+    if (act === 'mode') return switchMode(actEl.dataset.m);
+    if (act === 'hlnext') { S.hlIndex++; return focusMark(true); }
+    if (act === 'hlprev') { S.hlIndex--; return focusMark(true); }
+    if (act === 'hlclear') { S.hl = null; return renderMain(); }
+    if (act === 'sync') { setStatus('同步中…'); return run(async () => { await flush(); await sync(true); toast('已和雲端硬碟同步'); }); }
+    if (act === 'sysmenu') {
+      e.stopPropagation();
+      const items = [{label: '下載全部作品（txt 備份）', fn: () => downloadTxt(S.rootId)}];
+      if (DEMO) items.push({label: '離開示範版', fn: () => { location.href = location.pathname; }});
+      else items.push({label: '登出', fn: () => { localStorage.removeItem('nn_tok'); if (token && window.google) google.accounts.oauth2.revoke(token, () => {}); location.reload(); }});
+      return showMenu(actEl, items);
+    }
+  }
+  if (row) { openNode(row.dataset.id); return; }
+  const op = e.target.closest('[data-open]'); if (op) { openNode(op.dataset.open); return; }
+  const hit = e.target.closest('[data-hit]');
+  if (hit) {
+    S.hl = keywords(); S.view = 'node';
+    openNode(hit.dataset.hit, {mode: 'read', keepHl: true, pos: hit.dataset.pos === '' ? null : +hit.dataset.pos});
+  }
+});
+$('#q').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 250); });
+$('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { clearTimeout(searchTimer); runSearch(); e.target.blur(); } });
+$('#scope').addEventListener('change', () => { if (keywords().length) runSearch(); });
+$('#fileIn').addEventListener('change', e => { if (e.target.files.length) run(() => importFiles(e.target.files)); });
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); clearTimeout(saveTimer); flush(); }
+  if (e.key === 'Escape') hideMenu();
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { if (S.dirty.size) { clearTimeout(saveTimer); flush(); } }
+  else if (S.rootId) sync();
+});
+window.addEventListener('beforeunload', e => { if (S.dirty.size) { flush(); e.preventDefault(); e.returnValue = ''; } });
+$('#reauth').addEventListener('click', () => run(async () => {
+  await requestToken(); $('#authbar').classList.add('hidden'); await flush(); await sync(true);
+}));
+
+/* ---------------- 啟動 ---------------- */
+function show(id) { for (const s of ['setup', 'login', 'loading', 'app']) $('#' + s).classList.toggle('hidden', s !== id); }
+async function start() {
+  show('loading');
+  try {
+    await loadAll((d, t) => { $('#loadingText').textContent = `從雲端硬碟載入中… ${d} / ${t}`; });
+  } catch (e) {
+    if (e instanceof AuthError) { show('login'); return; }
+    show('login'); $('#loginErr').textContent = '載入失敗：' + e.message; return;
+  }
+  await restoreDrafts();
+  show('app');
+  renderScope(); renderTree();
+  const last = localStorage.getItem(DEMO ? 'nn_last_demo' : 'nn_last');
+  if (last && node(last)) { openNode(last); if (innerWidth <= 820) document.body.classList.remove('show-main'); }
+  else renderMain();
+  if (!S.dirty.size) setStatus(DEMO ? '示範版' : '已同步');
+  setInterval(() => { if (document.visibilityState === 'visible' && !S.dirty.size) sync(); }, 60000);
+}
+(async function init() {
+  $('#toDemo').onclick = () => { location.search = '?demo'; };
+  $('#cidSave').onclick = () => { const v = $('#cidInput').value.trim(); if (v) { localStorage.setItem('nn_client_id', v); location.reload(); } };
+  if (DEMO) return start();
+  if (!clientId()) return show('setup');
+  try { await initAuth(); } catch (e) { show('login'); $('#loginErr').textContent = e.message; return; }
+  $('#loginBtn').onclick = () => run(async () => {
+    $('#loginErr').textContent = '';
+    try { await requestToken(); start(); } catch (e) { $('#loginErr').textContent = '登入沒有完成：' + e.message; }
+  });
+  if (token) start(); else show('login');
+})();
+</script>
+</body>
+</html>
