@@ -221,6 +221,7 @@ h2.ptitle{font-family:var(--serif);font-size:30px;font-weight:600;margin:4px 0 1
 <div id="toast" class="hidden"></div>
 <div id="authbar" class="hidden"><span>Google 連線已過期，剛寫的內容已暫存在這台裝置。</span><button class="btn primary" id="reauth">重新連線</button></div>
 <input type="file" id="fileIn" multiple accept=".txt,.md,.docx,text/plain" class="hidden">
+<input type="file" id="bundleIn" accept=".json,application/json" class="hidden">
 
 <script>
 /* =========================================================
@@ -696,6 +697,29 @@ async function importFiles(files) {
   openNode(importTarget);
 }
 
+/** 整包匯入：{books:[{name, children:[{type:'folder',name,children}|{type:'doc',name,text}]}]} */
+async function importBundle(file) {
+  const data = JSON.parse(await readFileText(file));
+  const books = data.books || [data];
+  let total = 0, done = 0;
+  const countDocs = items => items.reduce((s, it) => s + (it.type === 'folder' ? countDocs(it.children || []) : 1), 0);
+  for (const b of books) total += countDocs(b.children || []);
+  const walk = async (items, pid) => {
+    for (const it of items) {
+      if (it.type === 'folder') { const f = await createFolder(pid, it.name); await walk(it.children || [], f.id); }
+      else { await createDoc(pid, it.name, it.text || '', true); done++; setStatus(`匯入中 ${done}/${total}…`); }
+    }
+  };
+  let first = null;
+  for (const b of books) {
+    const book = await createFolder(S.rootId, b.name); first = first || book;
+    await walk(b.children || [], book.id);
+  }
+  renderTree(); renderScope();
+  setStatus(`匯入完成，共 ${total} 篇`); toast(`已匯入 ${total} 篇`);
+  if (first) openNode(first.id);
+}
+
 /* ---------------- 畫面：左側目錄 ---------------- */
 function rowHtml(id, depth) {
   const n = node(id), isF = n.type === 'folder', open = S.expanded.has(id);
@@ -1048,7 +1072,7 @@ document.addEventListener('click', e => {
     if (act === 'sync') { setStatus('同步中…'); return run(async () => { await flush(); await sync(true); toast('已和雲端硬碟同步'); }); }
     if (act === 'sysmenu') {
       e.stopPropagation();
-      const items = [{label: '下載全部作品（txt 備份）', fn: () => downloadTxt(S.rootId)}];
+      const items = [{label: '整包匯入（.json）', fn: () => { const fi = $('#bundleIn'); fi.value = ''; fi.click(); }}, {label: '下載全部作品（txt 備份）', fn: () => downloadTxt(S.rootId)}];
       if (DEMO) items.push({label: '離開示範版', fn: () => { location.href = location.pathname; }});
       else items.push({label: '登出', fn: () => { localStorage.removeItem('nn_tok'); if (token && window.google) google.accounts.oauth2.revoke(token, () => {}); location.reload(); }});
       return showMenu(actEl, items);
@@ -1065,6 +1089,7 @@ document.addEventListener('click', e => {
 $('#q').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 250); });
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { clearTimeout(searchTimer); runSearch(); e.target.blur(); } });
 $('#scope').addEventListener('change', () => { if (keywords().length) runSearch(); });
+$('#bundleIn').addEventListener('change', e => { if (e.target.files.length) run(() => importBundle(e.target.files[0])); });
 $('#fileIn').addEventListener('change', e => { if (e.target.files.length) run(() => importFiles(e.target.files)); });
 document.addEventListener('keydown', e => {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); clearTimeout(saveTimer); flush(); }
