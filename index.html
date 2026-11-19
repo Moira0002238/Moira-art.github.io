@@ -106,7 +106,7 @@ R.setProperty("--bar",`url(${A.bar})`);R.setProperty("--barp",`url(${A.barp})`);
 const st=document.createElement("style");
 st.textContent=Object.keys(IDX).map(i=>`.fb[data-c=${i}]{background-image:var(--f-${i})}.fb[data-c=${i}].on{background-image:var(--fp-${i})}.tg[data-c=${i}]{background-image:var(--t-${i});background-size:100% 100%}`).join("")+`.bd{background-image:var(--b-done)}.bd:active{background-image:var(--bp-done)}.bx{background-image:var(--b-del)}.bx:active{background-image:var(--bp-del)}.rs{background-image:var(--rs)}.rs:active{background-image:var(--rsp)}.bk{background-image:var(--bk)}.bk:active{background-image:var(--bkp)}.ok{background-image:var(--ok)}.ok:active{background-image:var(--okp)}.eb{background-image:var(--eb)}.eb:active{background-image:var(--ebp)}.lb{background-image:var(--lb);display:flex;align-items:center;justify-content:center}.lb:active{background-image:var(--lbp)}.lb span{font-size:calc(var(--u)*46);font-weight:800;letter-spacing:.075em;color:var(--ink)}.lb:active span{color:#fff}.nb{background-image:var(--nb)}.nb:active{background-image:var(--nbp)}.xo{background-image:var(--xo)}.xo:active{background-image:var(--xop)}.xi{background-image:var(--xi)}.xi:active{background-image:var(--xip)}.bar{background-image:var(--bar)}.bar:active{background-image:var(--barp)}`;
 document.head.appendChild(st);
-let T=[],cat="a",pick="d";try{T=JSON.parse(localStorage.getItem(K)||"[]")}catch(e){}
+let T=[],cat="d",pick="d";try{T=JSON.parse(localStorage.getItem(K)||"[]")}catch(e){}
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(T))}catch(e){}};
 const E=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const S=(x,y,w,h)=>`left:calc(var(--u)*${x});top:calc(var(--uy)*${y});`+(w?`width:calc(var(--u)*${w});`:"")+(h?`height:calc(var(--uy)*${h});`:"");
@@ -124,7 +124,7 @@ else if(t=="br")o+="<br>";else if(t=="div"||t=="p")o+="<div>"+i+"</div>";
 else if(t=="span"){const m=/color:\s*rgb\((\d+),\s*(\d+),\s*(\d+)\)/.exec(c.getAttribute("style")||"");o+=m?'<font color="#'+[m[1],m[2],m[3]].map(v=>(+v).toString(16).padStart(2,"0")).join("")+'">'+i+"</font>":i}else o+=i}});return o}
 const san=h=>clean(new DOMParser().parseFromString("<body>"+h,"text/html").body);
 const plain=h=>new DOMParser().parseFromString("<body>"+String(h||"").replace(/<br\s*\/?>/gi,"\n").replace(/<\/div>/gi,"\n"),"text/html").body.textContent.replace(/\n{3,}/g,"\n\n").trim();
-function go(v){if(v!="note")NQ="";view=v;cat="a";MO=false;draw();const n=document.getElementById("ls");if(n)n.scrollTop=0}
+function go(v){if(v!="note")NQ="";view=v;cat="d";MO=false;draw();const n=document.getElementById("ls");if(n)n.scrollTop=0}
 const BT='width:calc(var(--u)*162);height:calc(var(--u)*63)',XT='width:calc(var(--u)*68);height:calc(var(--u)*65)';
 const fs2=v=>v.replaceAll("-","/"),bl=t=>{const a=t.acc||(t.pend&&t.start?t.start:"");return a?fs2(a)+" 接取":fs2(t.created)+" 建立"},dlb=t=>t.due?`<span class="dl">${dueTx(t.due)}</span>`:"";
 const cardT=t=>`<div class="cd ed" data-id="${t.id}" onclick="if(!event.target.closest('button'))ot('${t.id}')"><span class="tg b" data-c="${t.cat}"></span>${dlb(t)}<div class="ti${t.due?" dd":""}">${E(t.title)}</div>${t.note?`<div class="nt">${E(t.note)}</div>`:""}<div class="ft"><span class="dt">${bl(t)}${t.rep?`<br>${repTx(t.rep)}`:""}</span><div class="bs"><button class="b bd" style="width:calc(var(--u)*162);height:calc(var(--u)*62)" aria-label="完成" onclick="fin('${t.id}')"></button><button class="b bx" style="${XT}" aria-label="刪除" onclick="del('${t.id}')"></button></div></div></div>`;
@@ -189,7 +189,7 @@ async function dth(id){TH=TH.filter(x=>x.id!=id);try{await dbx("readwrite",s=>s.
 function dp(e){if(matchMedia("(pointer:fine)").matches)try{e.showPicker()}catch(x){}}
 const cardX=t=>`<div class="cd"><span class="pl" style="background:${TC["截止"]}">截止</span><div class="ti">${E(t.title)}</div>${t.note?`<div class="nt">${E(t.note)}</div>`:""}</div>`;
 let DG=null,DGT=0;
-function DGC(){const sd=CS||iso();return view=="task"&&cat=="a"?{g:()=>T,f:isA,s:save}:view=="food"?{g:()=>FD,f:()=>1,s:saveF}:view=="note"&&!NQ.trim()?{g:()=>N,f:()=>1,s:saveN}:view=="ach"?{g:()=>AC,f:()=>1,s:saveA}:view=="cal"?{g:()=>EV,f:e=>e.date==sd,s:saveE}:null}
+function DGC(){const sd=CS||iso();return view=="task"?{g:()=>T,f:t=>isA(t)&&(cat=="a"||t.cat==cat),s:save}:view=="food"?{g:()=>FD,f:()=>1,s:saveF}:view=="note"&&!NQ.trim()?{g:()=>N,f:()=>1,s:saveN}:view=="ach"?{g:()=>AC,f:()=>1,s:saveA}:view=="cal"?{g:()=>EV,f:e=>e.date==sd,s:saveE}:null}
 document.addEventListener("touchmove",e=>{if(DG)e.preventDefault()},{passive:false});
 document.addEventListener("click",e=>{if(Date.now()-DGT<450){e.stopPropagation();e.preventDefault()}},true);
 $.addEventListener("pointerdown",e=>{if(MO||e.button>0||!DGC())return;const c=e.target.closest("#ls .cd[data-id]");if(!c||e.target.closest("button"))return;
@@ -325,7 +325,7 @@ const rp=TD.rp?(TD.rk=="d"?{k:"d"}:TD.rk=="w"?{k:"w",w:[...TD.rw]}:{k:"m",m:+TD.
 const pd=!rp&&!!(TD.sd||TD.pd),f={cat:pick,title:t,note:TD.n.trim(),start:rp?"":TD.sd||"",rep:rp,due:!rp&&TD.lm?TD.du:"",pend:pd,wait:rp&&!matchD(rp,iso())?nextR(rp,iso()):""};let toP=false;
 if(TE){const o=T.find(x=>x.id==TE);if(o){if(rp&&o.rep&&JSON.stringify(o.rep)==JSON.stringify(rp))f.wait=o.wait||"";if(!pd&&o.pend&&!o.acc)o.acc=iso();Object.assign(o,f)}}
 else{const n={id:Date.now().toString(36),created:iso(),done:false,...f};T.unshift(n);toP=isP(n)}
-save();const b=TE?EB:toP?"tp":"task";TE=null;TD=ntd();cat="a";go(b)}
+save();const b=TE?EB:toP?"tp":"task";TE=null;TD=ntd();go(b);cat=f.cat;draw()}
 function fin(i){const t=T.find(x=>x.id==i);if(!t)return;
 if(t.rep){const h={...t,id:Date.now().toString(36)+"h",done:true,finished:iso(),rep:null,wait:"",pend:false};T.splice(T.indexOf(t),0,h);t.wait=nextR(t.rep,iso());save();draw();return}
 t.done=true;t.finished=iso();save();draw()}
